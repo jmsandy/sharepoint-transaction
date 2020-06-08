@@ -45,6 +45,8 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             }
 
             var item = Activator.CreateInstance<TSharePointItem>();
+            item.Id = listItem.Id;
+            
             foreach (var property in item.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any()).ToList())

@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\xunit.core.2.4.1\build\xunit.core.props" Condition="Exists('..\..\packages\xunit.core.2.4.1\build\xunit.core.props')" />
+  <Import Project="..\..\packages\xunit.runner.visualstudio.2.4.2\build\net452\xunit.runner.visualstudio.props" Condition="Exists('..\..\packages\xunit.runner.visualstudio.2.4.2\build\net452\xunit.runner.visualstudio.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D0DD61CE-9FD5-4416-B142-33E35E27DC4A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Polimorfismo.SharePointOnline.Transaction.Tests</RootNamespace>
+    <AssemblyName>Polimorfismo.SharePointOnline.Transaction.CSOM.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Client.Policy, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.Office.Client.Policy.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Client.TranslationServices, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.Office.Client.TranslationServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.SharePoint.Tools, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.Office.SharePoint.Tools.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Online.SharePoint.Client.Tenant, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.Online.SharePoint.Client.Tenant.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ProjectServer.Client, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.ProjectServer.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.DocumentManagement, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.DocumentManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Publishing, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.Publishing.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Runtime, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Runtime.Windows, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.Runtime.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Search, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.Search.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Search.Applications, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.Search.Applications.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.Taxonomy, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.Taxonomy.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.UserProfiles, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.UserProfiles.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SharePoint.Client.WorkflowServices, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.SharePoint.Client.WorkflowServices.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\xunit.abstractions.2.0.3\lib\net35\xunit.abstractions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.assert, Version=2.4.1.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\xunit.assert.2.4.1\lib\netstandard1.1\xunit.assert.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.core, Version=2.4.1.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\xunit.extensibility.core.2.4.1\lib\net452\xunit.core.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.execution.desktop, Version=2.4.1.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\xunit.extensibility.execution.2.4.1\lib\net452\xunit.execution.desktop.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="SharePointListItem.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SharePointBaseUnitTest.cs" />
+    <Compile Include="SharePointCrudUnitTest.cs" />
+    <Compile Include="TestExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\packages\xunit.analyzers.0.10.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Polimorfismo.SharePoint.Transaction.Core\Polimorfismo.SharePoint.Transaction.Core.csproj">
+      <Project>{2320b66a-c800-4411-a2fc-8cbbeda4cc99}</Project>
+      <Name>Polimorfismo.SharePoint.Transaction.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Polimorfismo.SharePointOnline.Transaction.CSOM\Polimorfismo.SharePointOnline.Transaction.CSOM.csproj">
+      <Project>{84950e76-1cd5-4bb4-8887-c69c03b26b94}</Project>
+      <Name>Polimorfismo.SharePointOnline.Transaction.CSOM</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\xunit.runner.visualstudio.2.4.2\build\net452\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\xunit.runner.visualstudio.2.4.2\build\net452\xunit.runner.visualstudio.props'))" />
+    <Error Condition="!Exists('..\..\packages\xunit.core.2.4.1\build\xunit.core.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\xunit.core.2.4.1\build\xunit.core.props'))" />
+    <Error Condition="!Exists('..\..\packages\xunit.core.2.4.1\build\xunit.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\xunit.core.2.4.1\build\xunit.core.targets'))" />
+  </Target>
+  <Import Project="..\..\packages\xunit.core.2.4.1\build\xunit.core.targets" Condition="Exists('..\..\packages\xunit.core.2.4.1\build\xunit.core.targets')" />
+</Project>

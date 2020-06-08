@@ -36,7 +36,7 @@ namespace Polimorfismo.SharePoint.Transaction
         public int Id
         {
             get => (int)Fields[SharePointConstants.FieldNameId];
-            set => Fields[SharePointConstants.FieldNameId] = value;
+            set => Fields[SharePointConstants.FieldNameId] = Item.Id = value;
         }
 
         #endregion

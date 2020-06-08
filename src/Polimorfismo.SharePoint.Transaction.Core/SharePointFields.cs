@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using Polimorfismo.SharePoint.Transaction.Utils;
 
 namespace Polimorfismo.SharePoint.Transaction
 {
@@ -34,9 +35,9 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public int Count => _fields.Count;
 
-        public object this[string key] 
+        public object this[string key]
         {
-            get =>_fields [key]; 
+            get => _fields[key];
             set => _fields[key] = value;
         }
 
@@ -49,6 +50,11 @@ namespace Polimorfismo.SharePoint.Transaction
         public SharePointFields(ISharePointItem item)
         {
             _fields = item.ToDictionary() ?? new Dictionary<string, object>();
+
+            if (!_fields.ContainsKey(SharePointConstants.FieldNameId))
+            {
+                _fields.Add(SharePointConstants.FieldNameId, item.Id);
+            }
         }
 
         ~SharePointFields() => Dispose(false);

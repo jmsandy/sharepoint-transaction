@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29920.165
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Polimorfismo.SharePoint.Transaction.Core", "src\Polimorfismo.SharePoint.Transaction.Core\Polimorfismo.SharePoint.Transaction.Core.csproj", "{2320B66A-C800-4411-A2FC-8CBBEDA4CC99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Polimorfismo.SharePoint.Transaction.Core", "src\Polimorfismo.SharePoint.Transaction.Core\Polimorfismo.SharePoint.Transaction.Core.csproj", "{2320B66A-C800-4411-A2FC-8CBBEDA4CC99}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Polimorfismo.SharePointOnline.Transaction.CSOM", "src\Polimorfismo.SharePointOnline.Transaction.CSOM\Polimorfismo.SharePointOnline.Transaction.CSOM.csproj", "{84950E76-1CD5-4BB4-8887-C69C03B26B94}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{4B2EC961-2768-48F6-9857-FD7E2AB1666D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{58ED9331-6B7D-46AD-AEA5-23651767FD9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Polimorfismo.SharePointOnline.Transaction.CSOM.Tests", "tests\Polimorfismo.SharePointOnline.Transaction.CSOM.Tests\Polimorfismo.SharePointOnline.Transaction.CSOM.Tests.csproj", "{D0DD61CE-9FD5-4416-B142-33E35E27DC4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +27,18 @@ Global
 		{84950E76-1CD5-4BB4-8887-C69C03B26B94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84950E76-1CD5-4BB4-8887-C69C03B26B94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84950E76-1CD5-4BB4-8887-C69C03B26B94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0DD61CE-9FD5-4416-B142-33E35E27DC4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0DD61CE-9FD5-4416-B142-33E35E27DC4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0DD61CE-9FD5-4416-B142-33E35E27DC4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0DD61CE-9FD5-4416-B142-33E35E27DC4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2320B66A-C800-4411-A2FC-8CBBEDA4CC99} = {4B2EC961-2768-48F6-9857-FD7E2AB1666D}
+		{84950E76-1CD5-4BB4-8887-C69C03B26B94} = {4B2EC961-2768-48F6-9857-FD7E2AB1666D}
+		{D0DD61CE-9FD5-4416-B142-33E35E27DC4A} = {58ED9331-6B7D-46AD-AEA5-23651767FD9E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1660DFE1-B01B-4CC0-9B3B-AEF7D1996C2F}

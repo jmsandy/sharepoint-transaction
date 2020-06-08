@@ -23,7 +23,7 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-05-24 08:26:20 PM</Date>
-    internal class SharePointInsertCommand<TSharePointItem> : SharePointCommand<TSharePointItem> 
+    internal class SharePointInsertCommand<TSharePointItem> : SharePointCommand<TSharePointItem>
         where TSharePointItem : ISharePointItem, new()
     {
         #region Constructors / Finalizers
@@ -52,6 +52,8 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
         public override async Task Undo()
         {
             await SharePointClient.DeleteItem<TSharePointItem>(SharePointItemTracking.Id);
+
+            SharePointItemTracking.Id = 0;
         }
 
         #endregion
