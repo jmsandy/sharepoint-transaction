@@ -8,6 +8,7 @@
     <Company>Polimorfismo</Company>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>Copyright (c) Polimorfismo - José Mauro da Silva Sandy</Copyright>
+    <RootNamespace>Polimorfismo.SharePoint.Transaction</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

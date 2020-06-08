@@ -1,10 +1,25 @@
-﻿using System;
+﻿// Copyright 2020 Polimorfismo - José Mauro da Silva Sandy
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Polimorfismo.SharePoint.Transaction.Core.Commands;
+using Polimorfismo.SharePoint.Transaction.Utils;
+using Polimorfismo.SharePoint.Transaction.Commands;
 
-namespace Polimorfismo.SharePoint.Transaction.Core
+namespace Polimorfismo.SharePoint.Transaction
 {
     /// <summary>
     /// Base class for the implementation of the instances that will establish 
@@ -20,15 +35,21 @@ namespace Polimorfismo.SharePoint.Transaction.Core
 
         private readonly LinkedList<ISharePointCommand> _commandQueue = new LinkedList<ISharePointCommand>();
 
-        private SharePointBackgroundTasks SharePointBackgroundTasks = new SharePointBackgroundTasks();
+        private readonly SharePointBackgroundTasks SharePointBackgroundTasks = new SharePointBackgroundTasks();
+
+        protected readonly IReadOnlyList<string> IgnorePropertiesInsertOrUpdate = new List<string>
+        {
+            SharePointConstants.FieldNameId,
+            SharePointConstants.FieldNameFileRef,
+            SharePointConstants.FieldNameCreated,
+            SharePointConstants.FieldNameModified,
+            SharePointConstants.FieldNameUIVersionString
+        };
 
         #endregion
 
         #region Constructors / Finalizers
 
-        /// <summary>
-        /// 
-        /// </summary>
         protected SharePointClientBase()
         {
         }
@@ -40,38 +61,41 @@ namespace Polimorfismo.SharePoint.Transaction.Core
         #region Methods
 
         protected internal abstract Task DeleteItem<TSharePointItem>(int id) 
-            where TSharePointItem : ISharePointItem;
+            where TSharePointItem : ISharePointItem, new();
 
         protected internal abstract Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields) 
-            where TSharePointItem : ISharePointItem;
+            where TSharePointItem : ISharePointItem, new();
 
         protected internal abstract Task<int> InsertItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields) 
-            where TSharePointItem : ISharePointItem;
+            where TSharePointItem : ISharePointItem, new();
 
         protected internal abstract Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml) 
-            where TSharePointItem : ISharePointItem;
+            where TSharePointItem : ISharePointItem, new();
+
+        protected TSharePointItem CreateSharePointItem<TSharePointItem>() 
+            where TSharePointItem : ISharePointItem, new() => SharePointItemFactory.Create<TSharePointItem>();
 
         public async Task<TSharePointItem> GetItemById<TSharePointItem>(int id) 
-            where TSharePointItem : ISharePointItem
+            where TSharePointItem : ISharePointItem, new()
         {
             var items = await GetItems<TSharePointItem>($"<View><Query><Where><Eq><FieldRef Name='ID' /><Value Type='Counter'>{id}</Value></Eq></Where></Query></View>");
             return items.FirstOrDefault();
         }
 
         public void AddItem<TSharePointItem>(TSharePointItem sharePointItem) 
-            where TSharePointItem : ISharePointItem
+            where TSharePointItem : ISharePointItem, new()
         {
             EnqueueCommand<SharePointInsertCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
         }
 
         public void UpdateItem<TSharePointItem>(TSharePointItem sharePointItem) 
-            where TSharePointItem : ISharePointItem
+            where TSharePointItem : ISharePointItem, new()
         {
             EnqueueCommand<SharePointUpdateCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
         }
 
         public void DeleteItem<TSharePointItem>(TSharePointItem sharePointItem) 
-            where TSharePointItem : ISharePointItem
+            where TSharePointItem : ISharePointItem, new()
         {
             EnqueueCommand<SharePointDeleteCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
         }
@@ -112,7 +136,7 @@ namespace Polimorfismo.SharePoint.Transaction.Core
         }
 
         private void EnqueueCommand<TSharePointCommand, TSharePointItem>(ISharePointItem sharePointItem)
-            where TSharePointItem : ISharePointItem
+            where TSharePointItem : ISharePointItem, new()
             where TSharePointCommand : SharePointCommand<TSharePointItem>
         {
             ISharePointCommand referenceCommand = null;
