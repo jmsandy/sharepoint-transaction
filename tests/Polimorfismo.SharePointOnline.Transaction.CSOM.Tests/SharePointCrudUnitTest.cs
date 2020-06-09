@@ -13,7 +13,11 @@
 // limitations under the License.
 
 using Xunit;
+using System;
+using CamlexNET;
+using System.Linq;
 using System.Threading.Tasks;
+using Polimorfismo.SharePoint.Transaction.Utils;
 
 namespace Polimorfismo.SharePointOnline.Transaction.Tests
 {
@@ -30,11 +34,17 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             var item = new SharePointListItem
             {
                 IntegerField = 1,
+                ChoiceField = true,
                 TitleField = "Title",
                 DecimalField = 22.00M,
+                CurrencyField = 1000M,
                 OptionField = "Option 2",
                 TextField = "Single Line",
-                TextArea = "Multiple Lines"
+                TextArea = "Multiple Lines",
+                PersonOrGroupField = Username,
+                DateField = DateTime.Now.Date,
+                LinkField = "https://www.microsoft.com",
+                ImageField = "https://www.microsoft.com"
             };
 
             _sharePointClient.AddItem(item);
@@ -46,11 +56,34 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             Assert.NotNull(expectedItem);
             item.Id.ShouldEqual(expectedItem.Id);
             item.TextArea.ShouldEqual(expectedItem.TextArea);
+            item.LinkField.ShouldEqual(expectedItem.LinkField);
             item.TextField.ShouldEqual(expectedItem.TextField);
             item.TitleField.ShouldEqual(expectedItem.TitleField);
+            item.ImageField.ShouldEqual(expectedItem.ImageField);
+            item.ChoiceField.ShouldEqual(expectedItem.ChoiceField);
             item.OptionField.ShouldEqual(expectedItem.OptionField);
             item.DecimalField.ShouldEqual(expectedItem.DecimalField);
             item.IntegerField.ShouldEqual(expectedItem.IntegerField);
+            item.CurrencyField.ShouldEqual(expectedItem.CurrencyField);
+            item.DateField.ShouldEqual(expectedItem.DateField.Value.Date);
+        }
+
+        [Fact]
+        public async Task SharePoint_GetItems_Success_Test()
+        {
+            var item = new SharePointListItem
+            {
+                TitleField = Guid.NewGuid().ToString()
+            };
+
+            _sharePointClient.AddItem(item);
+
+            await _sharePointClient.SaveChanges();
+            
+            var items = await _sharePointClient.GetItems<SharePointListItem>(
+                Camlex.Query().Where(i => (string)i[SharePointConstants.FieldNameTitle] == item.TitleField).ToCamlQuery());
+
+            item.TitleField.ShouldEqual(items.Single().TitleField);
         }
     }
 }

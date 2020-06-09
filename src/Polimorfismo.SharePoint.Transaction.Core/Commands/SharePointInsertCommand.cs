@@ -39,7 +39,7 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         #region ISharePointCommand - Members
 
-        public override Task Prepare() => Task.CompletedTask;
+        public override async Task Prepare() => await SharePointItemTracking.ConfigureUserFields(SharePointClient);
 
         public override async Task Execute()
         {

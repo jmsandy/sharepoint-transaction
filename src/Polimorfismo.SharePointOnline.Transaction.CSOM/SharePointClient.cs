@@ -39,6 +39,8 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         private readonly ICredentials _networkCredential;
 
+        protected readonly IList<SharePointUser> _users = new List<SharePointUser>();
+
         #endregion
 
         #region Properties
@@ -76,6 +78,24 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         #region SharePointClientBase - Members
 
+        public override async Task<SharePointUser> GetUserByLogin(string login)
+        {
+            if (string.IsNullOrWhiteSpace(login)) throw new ArgumentNullException(nameof(login));
+
+            var sharePointUser = _users.FirstOrDefault(u => u.Login.Equals(login, StringComparison.InvariantCulture));
+            if (sharePointUser != null) return sharePointUser;
+
+            var user = ClientContext.Web.EnsureUser(login);
+            ClientContext.Load(user);
+            await ClientContext.ExecuteQueryAsync();
+
+            sharePointUser = new SharePointUser(user.Id, login, user.Email, user.Title);
+
+            _users.Add(sharePointUser);
+
+            return sharePointUser;
+        }
+
         protected override async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml)
         {
             CamlQuery camlQuery = null;
@@ -87,11 +107,32 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return await GetItems<TSharePointItem>(camlQuery);
         }
 
+        protected override async Task DeleteItem<TSharePointItem>(int id)
+        {
+            var listItem = GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id);
+            listItem.DeleteObject();
+
+            await ClientContext.ExecuteQueryAsync();
+        }
+
+        protected override async Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
+        {
+            await Update(GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id), fields);
+        }
+
+        protected override async Task<int> InsertItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
+        {
+            var itemCreateInfo = new ListItemCreationInformation();
+            var listItem = GetList(CreateSharePointItem<TSharePointItem>().ListName).AddItem(itemCreateInfo);
+
+            return await Update(listItem, fields);
+        }
+
         #endregion
 
         #region Methods
 
-        public async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(CamlQuery camlQuery = null, 
+        public async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(CamlQuery camlQuery = null,
             params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointItem : ISharePointItem, new()
         {
             List<TSharePointItem> items = null;
@@ -118,33 +159,9 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return items;
         }
 
-        protected override async Task DeleteItem<TSharePointItem>(int id)
-        {
-            var listItem = GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id);
-            listItem.DeleteObject();
-
-            await ClientContext.ExecuteQueryAsync();
-        }
-
-        protected override async Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
-        {
-            await Update(GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id), fields);
-        }
-
-        protected override async Task<int> InsertItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
-        {
-            var itemCreateInfo = new ListItemCreationInformation();
-            var listItem = GetList(CreateSharePointItem<TSharePointItem>().ListName).AddItem(itemCreateInfo);
-
-            return await Update(listItem, fields);
-        }
-
         protected List GetList(string listName)
         {
-            if (string.IsNullOrEmpty(listName))
-            {
-                throw new ArgumentNullException("listName");
-            }
+            if (string.IsNullOrEmpty(listName)) throw new ArgumentNullException(nameof(listName));
 
             return ClientContext.Web.Lists.GetByTitle(listName);
         }

@@ -40,6 +40,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Camlex.Client, Version=4.0.0.0, Culture=neutral, PublicKeyToken=831792d54d5285b7, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Camlex.Client.dll.4.0.0\lib\net45\Camlex.Client.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Office.Client.Policy, Version=16.1.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.SharePointOnline.CSOM.16.1.20122.12000\lib\net45\Microsoft.Office.Client.Policy.dll</HintPath>
     </Reference>

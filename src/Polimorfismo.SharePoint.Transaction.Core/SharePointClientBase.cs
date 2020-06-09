@@ -29,11 +29,15 @@ namespace Polimorfismo.SharePoint.Transaction
     /// <Date>2020-05-24 08:14:44 PM</Date>
     public abstract class SharePointClientBase : IDisposable
     {
+        #region Fields
+
+        private readonly LinkedList<ISharePointCommand> _commandQueue = new LinkedList<ISharePointCommand>();
+
+        #endregion
+
         #region Properties
 
         internal readonly SharePointListItemTracking Tracking = new SharePointListItemTracking();
-
-        private readonly LinkedList<ISharePointCommand> _commandQueue = new LinkedList<ISharePointCommand>();
 
         private readonly SharePointBackgroundTasks SharePointBackgroundTasks = new SharePointBackgroundTasks();
 
@@ -60,41 +64,43 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Methods
 
-        protected internal abstract Task DeleteItem<TSharePointItem>(int id) 
+        protected internal abstract Task DeleteItem<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new();
 
-        protected internal abstract Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields) 
+        protected internal abstract Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
             where TSharePointItem : ISharePointItem, new();
 
-        protected internal abstract Task<int> InsertItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields) 
+        protected internal abstract Task<int> InsertItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
             where TSharePointItem : ISharePointItem, new();
 
-        protected internal abstract Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml) 
+        protected internal abstract Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml)
             where TSharePointItem : ISharePointItem, new();
 
-        protected TSharePointItem CreateSharePointItem<TSharePointItem>() 
+        protected TSharePointItem CreateSharePointItem<TSharePointItem>()
             where TSharePointItem : ISharePointItem, new() => SharePointItemFactory.Create<TSharePointItem>();
 
-        public async Task<TSharePointItem> GetItemById<TSharePointItem>(int id) 
+        public abstract Task<SharePointUser> GetUserByLogin(string login);
+
+        public async Task<TSharePointItem> GetItemById<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new()
         {
             var items = await GetItems<TSharePointItem>($"<View><Query><Where><Eq><FieldRef Name='ID' /><Value Type='Counter'>{id}</Value></Eq></Where></Query></View>");
             return items.FirstOrDefault();
         }
 
-        public void AddItem<TSharePointItem>(TSharePointItem sharePointItem) 
+        public void AddItem<TSharePointItem>(TSharePointItem sharePointItem)
             where TSharePointItem : ISharePointItem, new()
         {
             EnqueueCommand<SharePointInsertCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
         }
 
-        public void UpdateItem<TSharePointItem>(TSharePointItem sharePointItem) 
+        public void UpdateItem<TSharePointItem>(TSharePointItem sharePointItem)
             where TSharePointItem : ISharePointItem, new()
         {
             EnqueueCommand<SharePointUpdateCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
         }
 
-        public void DeleteItem<TSharePointItem>(TSharePointItem sharePointItem) 
+        public void DeleteItem<TSharePointItem>(TSharePointItem sharePointItem)
             where TSharePointItem : ISharePointItem, new()
         {
             EnqueueCommand<SharePointDeleteCommand<TSharePointItem>, TSharePointItem>(sharePointItem);

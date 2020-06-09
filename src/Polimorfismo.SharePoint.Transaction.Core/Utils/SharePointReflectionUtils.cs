@@ -41,13 +41,27 @@ namespace Polimorfismo.SharePoint.Transaction.Utils
             return dictionary;
         }
 
-        public static Dictionary<string, object> GetSharePointRefencesDictionaryValues<TSharePointItem>(TSharePointItem item) where TSharePointItem : ISharePointItem
+        public static Dictionary<string, object> GetSharePointReferencesDictionaryValues<TSharePointItem>(TSharePointItem item) where TSharePointItem : ISharePointItem
         {
             var dictionary = new Dictionary<string, object>();
 
             foreach (var property in item.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any(a => a.IsReference)).ToList())
+            {
+                dictionary.Add(property.GetCustomAttributes<SharePointFieldAttribute>().First().Name, property.GetValue(item));
+            }
+
+            return dictionary;
+        }
+
+        public static Dictionary<string, object> GetSharePointUsersDictionaryValues<TSharePointItem>(TSharePointItem item) where TSharePointItem : ISharePointItem
+        {
+            var dictionary = new Dictionary<string, object>();
+
+            foreach (var property in item.GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any(a => a.IsUserValue)).ToList())
             {
                 dictionary.Add(property.GetCustomAttributes<SharePointFieldAttribute>().First().Name, property.GetValue(item));
             }

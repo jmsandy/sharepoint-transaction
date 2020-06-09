@@ -29,23 +29,41 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
 
         public int Id { get; set; }
 
-        [SharePointField("Title")]
-        public string TitleField { get; set; }
+        [SharePointField("TextArea")]
+        public string TextArea { get; set; }
 
         [SharePointField("TextField")]
         public string TextField { get; set; }
 
-        [SharePointField("TextArea")]
-        public string TextArea { get; set; }
+        [SharePointField("ChoiceField")]
+        public bool ChoiceField { get; set; }
+
+        [SharePointField("IntegerField", Type = typeof(int))]
+        public int IntegerField { get; set; }
+
+        [SharePointField("LinkField")]
+        public string LinkField { get; set; }
+
+        [SharePointField("ImageField")]
+        public string ImageField { get; set; }
+
+        [SharePointField(SharePointConstants.FieldNameTitle)]
+        public string TitleField { get; set; }
 
         [SharePointField("OptionField")]
         public string OptionField { get; set; }
 
-        [SharePointField("IntegerField",  Type = typeof(int))]
-        public int IntegerField { get; set; }
+        [SharePointField("DateField")]
+        public DateTime? DateField { get; set; }
 
         [SharePointField("DecimalField", Type = typeof(decimal))]
         public decimal DecimalField { get; set; }
+
+        [SharePointField("CurrencyField", Type = typeof(decimal))]
+        public decimal CurrencyField { get; set; }
+
+        [SharePointField("PersonOrGroupField",  IsUserValue = true)]
+        public string PersonOrGroupField { get; set; }
 
         [SharePointField(SharePointConstants.FieldNameCreated)]
         public DateTime Created { get; set; }

@@ -43,6 +43,11 @@ namespace Polimorfismo.SharePoint.Transaction
         public bool IsReference { get; set; }
 
         /// <summary>
+        /// Checks whether the attribute is related to the ID or property that represents the user.
+        /// </summary>
+        public bool IsUserValue { get; set; }
+
+        /// <summary>
         /// If the type is Lookup it can be returning both the ID or the value that represents it.
         /// </summary>
         public bool IsLookupValue { get; set; }

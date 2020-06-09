@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Polimorfismo.SharePoint.Transaction.Utils;
 
@@ -33,7 +34,24 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public static Dictionary<string, object> GetReferences(this ISharePointItem item)
         {
-            return SharePointReflectionUtils.GetSharePointRefencesDictionaryValues(item);
+            return SharePointReflectionUtils.GetSharePointReferencesDictionaryValues(item);
+        }
+
+        public static Dictionary<string, object> GetUserFields(this ISharePointItem item)
+        {
+            return SharePointReflectionUtils.GetSharePointUsersDictionaryValues(item);
+        }
+
+        public static async Task ConfigureUserFields(this SharePointItemTracking itemTracking, SharePointClientBase sharePointClient)
+        {
+            foreach (var userField in itemTracking.Item.GetUserFields())
+            {
+                if (!string.IsNullOrWhiteSpace(userField.Value as string))
+                {
+                    itemTracking.Fields[userField.Key] =
+                        (await sharePointClient.GetUserByLogin(userField.Value as string)).Id;
+                }
+            }
         }
 
         public static IReadOnlyDictionary<string, object> ConfigureReferences(this SharePointItemTracking itemTracking, SharePointListItemTracking listTracking)

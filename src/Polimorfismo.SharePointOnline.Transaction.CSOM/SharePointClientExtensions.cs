@@ -46,7 +46,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
             var item = Activator.CreateInstance<TSharePointItem>();
             item.Id = listItem.Id;
-            
+
             foreach (var property in item.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any()).ToList())
@@ -58,7 +58,13 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
                     var itemValue = listItem.FieldValues[attribute.Name];
                     if (itemValue != null)
                     {
-                        if (itemValue is FieldLookupValue)
+                        if (itemValue is FieldUserValue)
+                        {
+                            property.SetValue(item, attribute.IsUserValue
+                                ? ((FieldUserValue)itemValue).LookupValue
+                                : (object)((FieldUserValue)itemValue).LookupId);
+                        }
+                        else if (itemValue is FieldLookupValue)
                         {
                             property.SetValue(item, attribute.IsLookupValue
                                 ? ((FieldLookupValue)itemValue).LookupValue
@@ -67,12 +73,6 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
                         else if (itemValue is FieldUrlValue)
                         {
                             property.SetValue(item, ((FieldUrlValue)itemValue).Url);
-                        }
-                        else if (itemValue is FieldUserValue)
-                        {
-                            property.SetValue(item, attribute.IsLookupValue
-                                ? ((FieldUserValue)itemValue).LookupValue
-                                : (object)((FieldUserValue)itemValue).LookupId);
                         }
                         else
                         {
@@ -89,7 +89,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return item;
         }
 
-        public static List<TSharePointItem> ToKnowType<TSharePointItem>(this ListItemCollection listItemCollection, ClientContext clientContext) 
+        public static List<TSharePointItem> ToKnowType<TSharePointItem>(this ListItemCollection listItemCollection, ClientContext clientContext)
             where TSharePointItem : ISharePointItem
         {
             var items = Activator.CreateInstance<List<TSharePointItem>>();
