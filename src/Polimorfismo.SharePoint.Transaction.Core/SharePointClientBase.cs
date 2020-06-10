@@ -33,13 +33,13 @@ namespace Polimorfismo.SharePoint.Transaction
 
         private readonly LinkedList<ISharePointCommand> _commandQueue = new LinkedList<ISharePointCommand>();
 
+        private readonly SharePointBackgroundTasks _sharePointBackgroundTasks = new SharePointBackgroundTasks();
+
         #endregion
 
         #region Properties
 
         internal readonly SharePointListItemTracking Tracking = new SharePointListItemTracking();
-
-        private readonly SharePointBackgroundTasks SharePointBackgroundTasks = new SharePointBackgroundTasks();
 
         protected readonly IReadOnlyList<string> IgnorePropertiesInsertOrUpdate = new List<string>
         {
@@ -110,8 +110,8 @@ namespace Polimorfismo.SharePoint.Transaction
         {
             var undoStack = new Stack<ISharePointCommand>();
 
-            SharePointBackgroundTasks.Wait(60);
-            SharePointBackgroundTasks.Cancel();
+            _sharePointBackgroundTasks.Wait(60);
+            _sharePointBackgroundTasks.Cancel();
 
 #warning Check running tasks
             try
@@ -130,6 +130,12 @@ namespace Polimorfismo.SharePoint.Transaction
             catch
             {
                 await Rollback(undoStack);
+            }
+            finally
+            {
+                Tracking.Clear();
+                _commandQueue.Clear();
+                _sharePointBackgroundTasks.Clear();
             }
         }
 
@@ -170,7 +176,7 @@ namespace Polimorfismo.SharePoint.Transaction
                 _commandQueue.AddLast(command);
             }
 
-            SharePointBackgroundTasks.Action(() =>
+            _sharePointBackgroundTasks.Action(() =>
             {
                 command.Prepare().Wait();
             });
@@ -192,7 +198,7 @@ namespace Polimorfismo.SharePoint.Transaction
             {
                 Tracking?.Dispose();
                 _commandQueue?.Clear();
-                SharePointBackgroundTasks?.Dispose();
+                _sharePointBackgroundTasks?.Dispose();
             }
         }
 

@@ -49,7 +49,8 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
             foreach (var property in item.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any()).ToList())
+                .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any(a => !a.IsReference))
+                .ToList())
             {
                 var attribute = property.GetCustomAttributes<SharePointFieldAttribute>().First();
 

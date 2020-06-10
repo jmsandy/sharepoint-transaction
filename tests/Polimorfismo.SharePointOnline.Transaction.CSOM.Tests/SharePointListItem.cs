@@ -70,5 +70,11 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
 
         [SharePointField(SharePointConstants.FieldNameModified)]
         public DateTime Modified { get; set; }
+
+        [SharePointField("LookupField", IsLookupValue = false)]
+        public int? LookupFieldId { get; set; }
+
+        [SharePointField("LookupField", IsReference = true)]
+        public SharePointAggregatingListItem LookupField { get; set; }
     }
 }

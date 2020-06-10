@@ -30,7 +30,7 @@ namespace Polimorfismo.SharePoint.Transaction
 
         internal CancellationToken Token => CancellationTokenSource.Token;
 
-        private ConcurrentBag<Task> Tasks { get; } = new ConcurrentBag<Task>();
+        private ConcurrentBag<Task> Tasks { get; set; } = new ConcurrentBag<Task>();
 
         private CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
 
@@ -61,6 +61,11 @@ namespace Polimorfismo.SharePoint.Transaction
         public void Cancel()
         {
             CancellationTokenSource.Cancel();
+        }
+
+        public void Clear()
+        {
+            Tasks = new ConcurrentBag<Task>();
         }
 
         #endregion

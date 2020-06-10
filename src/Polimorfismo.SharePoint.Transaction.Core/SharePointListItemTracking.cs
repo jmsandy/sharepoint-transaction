@@ -27,7 +27,7 @@ namespace Polimorfismo.SharePoint.Transaction
     {
         #region Fields
 
-        private List<SharePointItemTracking> _items = new List<SharePointItemTracking>();
+        private readonly List<SharePointItemTracking> _items = new List<SharePointItemTracking>();
 
         #endregion
 
@@ -49,6 +49,11 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Methods
 
+        public void Clear()
+        {
+            _items.Clear();
+        }
+
         public void Add(SharePointItemTracking item) => _items.Add(item);
 
         public SharePointItemTracking Get(ISharePointItem item)
@@ -68,7 +73,7 @@ namespace Polimorfismo.SharePoint.Transaction
         {
             if (disposing)
             {
-                _items = null;
+                _items.Clear();
             }
         }
 
