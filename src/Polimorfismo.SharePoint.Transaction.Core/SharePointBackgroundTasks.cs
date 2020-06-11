@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
@@ -32,7 +33,7 @@ namespace Polimorfismo.SharePoint.Transaction
 
         private ConcurrentBag<Task> Tasks { get; set; } = new ConcurrentBag<Task>();
 
-        private CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();
+        private CancellationTokenSource CancellationTokenSource { get; set; } = new CancellationTokenSource();
 
         #endregion
 
@@ -66,6 +67,12 @@ namespace Polimorfismo.SharePoint.Transaction
         public void Clear()
         {
             Tasks = new ConcurrentBag<Task>();
+            CancellationTokenSource = new CancellationTokenSource();
+        }
+
+        public bool AllTasksCompletedSuccess()
+        {
+            return Tasks.All(task => task.Status == TaskStatus.RanToCompletion);
         }
 
         #endregion

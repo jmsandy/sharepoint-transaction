@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Polimorfismo.SharePoint.Transaction.Utils;
 using Polimorfismo.SharePoint.Transaction.Commands;
+using Polimorfismo.SharePoint.Transaction.Resources;
 
 namespace Polimorfismo.SharePoint.Transaction
 {
@@ -110,12 +111,16 @@ namespace Polimorfismo.SharePoint.Transaction
         {
             var undoStack = new Stack<ISharePointCommand>();
 
-            _sharePointBackgroundTasks.Wait(60);
-            _sharePointBackgroundTasks.Cancel();
-
-#warning Check running tasks
             try
             {
+                _sharePointBackgroundTasks.Wait(30);
+
+                if (!_sharePointBackgroundTasks.AllTasksCompletedSuccess())
+                {
+                    _sharePointBackgroundTasks.Cancel();
+                    throw new SharePointException(SharePointErrorCode.PreparationCommandNotCompleted, SharePointMessages.ERR400);
+                }
+
                 while (_commandQueue.Count > 0)
                 {
                     var command = _commandQueue.First();
