@@ -16,6 +16,7 @@ using System;
 using System.Security;
 using Microsoft.SharePoint.Client;
 using Polimorfismo.Microsoft.SharePoint.Transaction;
+using Polimorfismo.SharePointOnline.Transaction.Tests.Logging;
 
 namespace Polimorfismo.SharePointOnline.Transaction.Tests
 {
@@ -49,7 +50,9 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
         protected SharePointBaseUnitTest()
         {
             foreach (char c in UserPwd.ToCharArray()) _password.AppendChar(c);
-            _sharePointClient = new SharePointClient(WebFullUrl, new SharePointOnlineCredentials(Username, _password));
+            _sharePointClient = new SharePointClient(WebFullUrl, 
+                                                     new SharePointOnlineCredentials(Username, _password),
+                                                     new SharePointSerilog());
         }
 
         ~SharePointBaseUnitTest() => Dispose(false);
