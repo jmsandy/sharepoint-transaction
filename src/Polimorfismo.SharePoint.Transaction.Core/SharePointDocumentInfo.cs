@@ -12,6 +12,14 @@ namespace Polimorfismo.SharePoint.Transaction
     /// <Date>2020-06-13 10:35:54 AM</Date>
     public class SharePointDocumentInfo
     {
+        #region Fields
+
+        private List<SharePointDocumentInfo> _documents;
+
+        #endregion
+
+        #region Properties
+
         public int Id { get; }
 
         public string Name { get; }
@@ -26,7 +34,11 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public bool IsFile { get; }
 
-        public List<SharePointDocumentInfo> Documents { get; }
+        public IReadOnlyCollection<SharePointDocumentInfo> Documents => _documents.AsReadOnly();
+
+        #endregion
+
+        #region Constructors / Finalizers
 
         public SharePointDocumentInfo(int id, string name, byte[] content, bool isFile)
         {
@@ -34,19 +46,25 @@ namespace Polimorfismo.SharePoint.Transaction
             Name = name;
             IsFile = isFile;
             Content = content;
-            Documents = new List<SharePointDocumentInfo>();
+            _documents = new List<SharePointDocumentInfo>();
         }
+
+        #endregion
+
+        #region Methods
 
         public void AddDocument(SharePointDocumentInfo document)
         {
-            Documents.Add(document);
+            _documents.Add(document);
         }
 
         public void AddDocuments(IEnumerable<SharePointDocumentInfo> documents)
         {
-            if (IsFile) Documents.AddRange(documents);
+            if (IsFile) _documents.AddRange(documents);
 
             throw new SharePointException(SharePointErrorCode.OnlyFoldersCanReceiveDocuments, SharePointMessages.ERR402);
         }
+
+        #endregion
     }
 }

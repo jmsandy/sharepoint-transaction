@@ -78,7 +78,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         #region SharePointClientBase - Members
 
-        public async Task<SharePointDocumentInfo> GetDocuments(string documentLibraryName, string fileRef)
+        public override async Task<SharePointDocumentInfo> GetDocuments(string documentLibraryName, string fileRef)
         {
             SharePointDocumentInfo documentInfo = null;
 
@@ -88,10 +88,45 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
                 var documentLibrary = clientContext.GetList(documentLibraryName);
 
-                var fileRelativeUri = GetDocumentUri(fileRef);
-                if (await clientContext.DocumentIsFile(documentLibrary, fileRelativeUri))
+                var documentRelativeUri = GetDocumentUri(fileRef);
+                if (await clientContext.DocumentIsFile(documentLibrary, documentRelativeUri))
                 {
-                    documentInfo = await clientContext.GetFileInfoByServerRelativeUrl(fileRelativeUri);
+                    documentInfo = await clientContext.GetFileInfoByServerRelativeUrl(documentRelativeUri);
+                }
+                else
+                {
+                    var folderName = documentRelativeUri.Split('/').Last();
+                    var rootPath = documentRelativeUri.Replace(folderName, "");
+
+                    var documents = (await clientContext.GetAllContentByServerRelativeUrl(documentLibrary, documentRelativeUri))
+                        .Select(document => new
+                        {
+                            Id = document.Id,
+                            Isfolder = document.FileSystemObjectType == FileSystemObjectType.Folder,
+                            FileRef = document.FieldValues[SharePointConstants.FieldNameFileRef].ToString(),
+                            Name = document.FieldValues[SharePointConstants.FieldNameFileRef].ToString().Split('/').Last(),
+                            Owner = (document.FieldValues[SharePointConstants.FieldNameFileDirRef].ToString()).Replace(rootPath, ""),
+                            Level = (document.FieldValues[SharePointConstants.FieldNameFileDirRef].ToString()).Replace(documentRelativeUri, "").Split('/').Length
+                        });
+
+                    documentInfo = new SharePointDocumentInfo(0, folderName, null, false);
+                    var folders = new Dictionary<string, SharePointDocumentInfo>();
+                    folders.Add(folderName, documentInfo);
+
+                    documents.Where(document => document.Isfolder)
+                        .OrderBy(document => document.Level)
+                        .ToList().ForEach(document =>
+                        {
+                            var sharePointDocumentInfo = new SharePointDocumentInfo(document.Id, document.Name, null, false);
+                            folders[document.Owner].AddDocument(sharePointDocumentInfo);
+
+                            folders.Add($"{document.Owner}/{document.Name}", sharePointDocumentInfo);
+                        });
+
+                    foreach (var document in documents.Where(document => !document.Isfolder).ToList())
+                    {
+                        folders[document.Owner].AddDocument(await clientContext.GetFileInfoByServerRelativeUrl(document.FileRef));
+                    }
                 }
             }
 
@@ -137,20 +172,16 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         protected override async Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
         {
-            var listName = CreateSharePointItem<TSharePointItem>().ListName;
-            await Update(listName, ClientContext.GetList(listName).GetItemById(id), fields);
+            await Update(ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id), fields);
         }
 
 
         protected override async Task<int> InsertItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
         {
             var itemCreateInfo = new ListItemCreationInformation();
-            var listName = CreateSharePointItem<TSharePointItem>().ListName;
-            var listItem = ClientContext.GetList(listName).AddItem(itemCreateInfo);
+            var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).AddItem(itemCreateInfo);
 
-            var id = await Update(listName, listItem, fields);
-
-            return id;
+            return await Update(listItem, fields);
         }
 
         #endregion
@@ -167,7 +198,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             {
                 clientContext.Credentials = _networkCredential;
 
-                var listWithContent = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName);
+                var listWithContent = clientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName);
 
                 listItemCollection = listWithContent.GetItems(camlQuery ?? CamlQuery.CreateAllItemsQuery());
                 clientContext.Load(listItemCollection, retrievals);
@@ -181,14 +212,15 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             
             return items;
         }
-        
+
+        protected Uri GetBaseSharePointUri() => new Uri(new Uri(_webFullUrl).GetLeftPart(UriPartial.Path));
+
         protected string GetDocumentUri(string documentUri) => 
             Uri.IsWellFormedUriString(documentUri, UriKind.Relative) 
                 ? documentUri 
                 : Uri.UnescapeDataString(new Uri(GetBaseSharePointUri(), documentUri).AbsolutePath);
 
-        protected Uri GetBaseSharePointUri() => new Uri(new Uri(_webFullUrl).GetLeftPart(UriPartial.Path));
-        protected async Task<int> Update(string listName, ListItem listItem, IReadOnlyDictionary<string, object> fields)
+        protected async Task<int> Update(ListItem listItem, IReadOnlyDictionary<string, object> fields)
         {
             foreach (var field in fields.Where(keyValue => !IgnorePropertiesInsertOrUpdate.Contains(keyValue.Key)))
             {

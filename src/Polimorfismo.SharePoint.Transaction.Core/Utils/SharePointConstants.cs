@@ -34,7 +34,9 @@ namespace Polimorfismo.SharePoint.Transaction.Utils
         public const string FieldNameCreated = "Created";
         
         public const string FieldNameModified = "Modified";
-        
+
+        public const string FieldNameFileDirRef = "FileDirRef";
+
         public const string FieldNameUIVersionString = "_UIVersionString";
     }
 }

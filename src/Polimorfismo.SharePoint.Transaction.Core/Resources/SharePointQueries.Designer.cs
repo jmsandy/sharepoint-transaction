@@ -61,6 +61,15 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;View Scope=&apos;RecursiveAll&apos;&gt;&lt;Query&gt;&lt;/Query&gt;&lt;/View&gt;.
+        /// </summary>
+        public static string QueryAllFoldersFiles {
+            get {
+                return ResourceManager.GetString("QueryAllFoldersFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;View&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name=&apos;FileRef&apos; /&gt;&lt;Value Type=&apos;Text&apos;&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;.
         /// </summary>
         public static string QueryDocumentType {

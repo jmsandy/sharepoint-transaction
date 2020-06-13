@@ -127,6 +127,21 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return item.FileSystemObjectType == FileSystemObjectType.File;
         }
 
+        public static async Task<ListItemCollection> GetAllContentByServerRelativeUrl(this ClientContext clientContext, List documentLibrary, string relativeUrl)
+        {
+            var camlQuery = new CamlQuery()
+            {
+                FolderServerRelativeUrl = relativeUrl,
+                ViewXml = SharePointQueries.QueryAllFoldersFiles
+            };
+
+            var documents = documentLibrary.GetItems(camlQuery);
+            clientContext.Load(documents);
+            await clientContext.ExecuteQueryAsync();
+
+            return documents;
+        }
+
         public static async Task<byte[]> GetContentFile(this ClientContext clientContext, File file)
         {
             byte[] content = null;

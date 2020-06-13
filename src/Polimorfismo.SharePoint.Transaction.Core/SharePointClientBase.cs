@@ -82,6 +82,8 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public abstract Task<SharePointUser> GetUserByLogin(string login);
 
+        public abstract Task<SharePointDocumentInfo> GetDocuments(string documentLibraryName, string fileRef);
+
         public async Task<TSharePointItem> GetItemById<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new()
         {
