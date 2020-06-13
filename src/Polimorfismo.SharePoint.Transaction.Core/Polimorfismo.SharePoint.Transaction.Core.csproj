@@ -24,12 +24,21 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>SharePointMessages.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\SharePointQueries.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SharePointQueries.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Resources\SharePointMessages.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>SharePointMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\SharePointQueries.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SharePointQueries.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

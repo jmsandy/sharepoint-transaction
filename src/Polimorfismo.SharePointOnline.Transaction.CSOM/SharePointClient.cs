@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using Microsoft.SharePoint.Client;
 using Polimorfismo.SharePoint.Transaction;
 using Polimorfismo.SharePoint.Transaction.Utils;
-using Polimorfismo.SharePoint.Transaction.Logging;
 
 namespace Polimorfismo.Microsoft.SharePoint.Transaction
 {
@@ -66,10 +65,8 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         #region Constructors/Finalizers
 
-        public SharePointClient(string webFullUrl, 
-                                ICredentials credential, 
-                                ISharePointLogging logging = null)
-            : base(logging)
+        public SharePointClient(string webFullUrl, ICredentials credential)
+            : base()
         {
             _webFullUrl = webFullUrl;
             _networkCredential = credential;
@@ -81,10 +78,28 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         #region SharePointClientBase - Members
 
+        public async Task<SharePointDocumentInfo> GetDocuments(string documentLibraryName, string fileRef)
+        {
+            SharePointDocumentInfo documentInfo = null;
+
+            using (var clientContext = new ClientContext(_webFullUrl))
+            {
+                clientContext.Credentials = _networkCredential;
+
+                var documentLibrary = clientContext.GetList(documentLibraryName);
+
+                var fileRelativeUri = GetDocumentUri(fileRef);
+                if (await clientContext.DocumentIsFile(documentLibrary, fileRelativeUri))
+                {
+                    documentInfo = await clientContext.GetFileInfoByServerRelativeUrl(fileRelativeUri);
+                }
+            }
+
+            return documentInfo;
+        }
+
         public override async Task<SharePointUser> GetUserByLogin(string login)
         {
-            Logger?.Info($"{GetType().Name}|GetUserByLogin(login = \"{login}\")|Begin");
-
             if (string.IsNullOrWhiteSpace(login)) throw new ArgumentNullException(nameof(login));
 
             var sharePointUser = _users.FirstOrDefault(u => u.Login.Equals(login, StringComparison.InvariantCulture));
@@ -98,59 +113,42 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
             _users.Add(sharePointUser);
 
-            Logger?.Info($"{GetType().Name}|GetUserByLogin(login = \"{login}\")|End");
-
             return sharePointUser;
         }
 
         protected override async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml)
         {
-            Logger?.Info($"{GetType().Name}|GetItems(viewXml = \"{viewXml}\")|Begin");
-
             CamlQuery camlQuery = null;
             if (!string.IsNullOrWhiteSpace(viewXml))
             {
                 camlQuery = new CamlQuery() { ViewXml = viewXml };
             }
 
-            Logger?.Info($"{GetType().Name}|GetItems(viewXml = \"{viewXml}\")|End");
-
             return await GetItems<TSharePointItem>(camlQuery);
         }
 
         protected override async Task DeleteItem<TSharePointItem>(int id)
         {
-            Logger?.Info($"{GetType().Name}|DeleteItem(id = {id})|Begin");
-
-            var listItem = GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id);
+            var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id);
             listItem.DeleteObject();
 
             await ClientContext.ExecuteQueryAsync();
-
-            Logger?.Info($"{GetType().Name}|DeleteItem(id = {id})|End");
         }
 
         protected override async Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
         {
-            Logger?.Info($"{GetType().Name}|UpdateItem( d = {id})|Begin");
-
             var listName = CreateSharePointItem<TSharePointItem>().ListName;
-            await Update(listName, GetList(listName).GetItemById(id), fields);
-
-            Logger?.Info($"{GetType().Name}|UpdateItem(id = {id})|End");
+            await Update(listName, ClientContext.GetList(listName).GetItemById(id), fields);
         }
+
 
         protected override async Task<int> InsertItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
         {
-            Logger?.Info($"{GetType().Name}|InsertItem()|Begin");
-
             var itemCreateInfo = new ListItemCreationInformation();
             var listName = CreateSharePointItem<TSharePointItem>().ListName;
-            var listItem = GetList(listName).AddItem(itemCreateInfo);
+            var listItem = ClientContext.GetList(listName).AddItem(itemCreateInfo);
 
             var id = await Update(listName, listItem, fields);
-
-            Logger?.Info($"{GetType().Name}|InsertItem()|End|{id}");
 
             return id;
         }
@@ -158,12 +156,10 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
         #endregion
 
         #region Methods
-
+        
         public async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(CamlQuery camlQuery = null,
             params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointItem : ISharePointItem, new()
         {
-            Logger?.Info($"{GetType().Name}|GetItems(camlQuery\"{camlQuery}\")|Begin");
-
             List<TSharePointItem> items = null;
             ListItemCollection listItemCollection;
 
@@ -171,9 +167,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             {
                 clientContext.Credentials = _networkCredential;
 
-                var listWithContent = clientContext.Web.Lists.GetByTitle(CreateSharePointItem<TSharePointItem>().ListName);
-                clientContext.Load(listWithContent);
-                await clientContext.ExecuteQueryAsync();
+                var listWithContent = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName);
 
                 listItemCollection = listWithContent.GetItems(camlQuery ?? CamlQuery.CreateAllItemsQuery());
                 clientContext.Load(listItemCollection, retrievals);
@@ -184,26 +178,21 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
                     items = listItemCollection.ToKnowType<TSharePointItem>(clientContext);
                 }
             }
-
-            Logger?.Info($"{GetType().Name}|GetItems(camlQuery\"{camlQuery}\")|End");
-
+            
             return items;
         }
+        
+        protected string GetDocumentUri(string documentUri) => 
+            Uri.IsWellFormedUriString(documentUri, UriKind.Relative) 
+                ? documentUri 
+                : Uri.UnescapeDataString(new Uri(GetBaseSharePointUri(), documentUri).AbsolutePath);
 
-        protected List GetList(string listName)
-        {
-            if (string.IsNullOrEmpty(listName)) throw new ArgumentNullException(nameof(listName));
-
-            return ClientContext.Web.Lists.GetByTitle(listName);
-        }
-
+        protected Uri GetBaseSharePointUri() => new Uri(new Uri(_webFullUrl).GetLeftPart(UriPartial.Path));
         protected async Task<int> Update(string listName, ListItem listItem, IReadOnlyDictionary<string, object> fields)
         {
             foreach (var field in fields.Where(keyValue => !IgnorePropertiesInsertOrUpdate.Contains(keyValue.Key)))
             {
                 listItem[field.Key] = field.Value;
-
-                Logger?.Debug($"{GetType().Name}|Update Field|{listName} -> {field.Key} = {field.Value}");
             }
 
             listItem.Update();

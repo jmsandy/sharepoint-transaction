@@ -21,6 +21,9 @@ namespace Polimorfismo.SharePoint.Transaction
     /// <Date>2020-06-10 08:50:20 PM</Date>
     public enum SharePointErrorCode
     {
-        PreparationCommandNotCompleted = 400
+        PreparationCommandNotCompleted = 400,
+        DocumentNotFound = 401,
+        OnlyFoldersCanReceiveDocuments = 402,
+        SaveChanges = 403
     }
 }

@@ -17,7 +17,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Polimorfismo.SharePoint.Transaction.Utils;
-using Polimorfismo.SharePoint.Transaction.Logging;
 using Polimorfismo.SharePoint.Transaction.Commands;
 using Polimorfismo.SharePoint.Transaction.Resources;
 
@@ -41,8 +40,6 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Properties
 
-        protected internal ISharePointLogging Logger { get; private set; }
-
         internal readonly SharePointListItemTracking Tracking = new SharePointListItemTracking();
 
         protected readonly IReadOnlyList<string> IgnorePropertiesInsertOrUpdate = new List<string>
@@ -58,9 +55,8 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Constructors / Finalizers
 
-        protected SharePointClientBase(ISharePointLogging logging = null)
+        protected SharePointClientBase()
         {
-            Logger = logging;
         }
 
         ~SharePointClientBase() => Dispose(false);
@@ -89,13 +85,8 @@ namespace Polimorfismo.SharePoint.Transaction
         public async Task<TSharePointItem> GetItemById<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new()
         {
-            var items = await GetItems<TSharePointItem>($"<View><Query><Where><Eq><FieldRef Name='ID' /><Value Type='Counter'>{id}</Value></Eq></Where></Query></View>");
+            var items = await GetItems<TSharePointItem>(string.Format(SharePointQueries.QueryItemById, id));
             return items.FirstOrDefault();
-        }
-
-        public void AddLogging(ISharePointLogging logging)
-        {
-            Logger = logging;
         }
 
         public void AddItem<TSharePointItem>(TSharePointItem sharePointItem)
@@ -122,8 +113,6 @@ namespace Polimorfismo.SharePoint.Transaction
 
             try
             {
-                Logger?.Info($"{GetType().Name}|SaveChanges()|Begin");
-
                 _sharePointBackgroundTasks.Wait(30);
 
                 if (!_sharePointBackgroundTasks.AllTasksCompletedSuccess())
@@ -145,17 +134,15 @@ namespace Polimorfismo.SharePoint.Transaction
             }
             catch (Exception ex)
             {
-                Logger?.Error(ex, $"{GetType().Name}|SaveChanges()|Error", ex.Message);
-
                 await Rollback(undoStack);
+
+                throw new SharePointException(SharePointErrorCode.SaveChanges, ex.Message, ex);
             }
             finally
             {
                 Tracking.Clear();
                 _commandQueue.Clear();
                 _sharePointBackgroundTasks.Clear();
-
-                Logger?.Info($"{GetType().Name}|SaveChanges()|End");
             }
         }
 

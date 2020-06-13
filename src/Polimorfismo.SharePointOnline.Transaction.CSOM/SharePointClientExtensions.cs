@@ -15,9 +15,11 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.SharePoint.Client;
 using Polimorfismo.SharePoint.Transaction;
+using Polimorfismo.SharePoint.Transaction.Resources;
 
 namespace Polimorfismo.Microsoft.SharePoint.Transaction
 {
@@ -28,15 +30,6 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
     /// <Date>2020-05-25 10:04:15 PM</Date>
     internal static class SharePointClientExtensions
     {
-        public static User GetUser(this ClientContext clientContext, string logonName)
-        {
-            var user = clientContext.Web.EnsureUser(logonName);
-            clientContext.Load(user);
-            clientContext.ExecuteQuery();
-
-            return user;
-        }
-
         public static TSharePointItem CopyListItemTo<TSharePointItem>(this ClientContext clientContext, ListItem listItem) where TSharePointItem : ISharePointItem
         {
             if (listItem == null)
@@ -104,6 +97,66 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             }
 
             return items;
+        }
+
+        public static List GetList(this ClientContext clientContext, string listName)
+        {
+            if (string.IsNullOrEmpty(listName)) throw new ArgumentNullException(nameof(listName));
+
+            return clientContext.Web.Lists.GetByTitle(listName);
+        }
+
+        public static async Task<bool> DocumentIsFile(this ClientContext clientContext, List documentLibrary, string fileRef)
+        {
+            var camlQuery = new CamlQuery
+            {
+                ViewXml = string.Format(SharePointQueries.QueryDocumentType, fileRef)
+            };
+
+            var listItemCollection = documentLibrary.GetItems(camlQuery);
+
+            clientContext.Load(listItemCollection);
+            await clientContext.ExecuteQueryAsync();
+
+            var item = listItemCollection.FirstOrDefault();
+            if (item == null)
+            {
+                throw new SharePointException(SharePointErrorCode.DocumentNotFound, string.Format(SharePointMessages.ERR401, fileRef));
+            }
+
+            return item.FileSystemObjectType == FileSystemObjectType.File;
+        }
+
+        public static async Task<byte[]> GetContentFile(this ClientContext clientContext, File file)
+        {
+            byte[] content = null;
+            var data = file.OpenBinaryStream();
+
+            if (data != null)
+            {
+                clientContext.Load(file);
+                await clientContext.ExecuteQueryAsync();
+
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    await data.Value.CopyToAsync(ms);
+                    content = ms.ToArray();
+                }
+            }
+
+            return content;
+        }
+
+        public static async Task<SharePointDocumentInfo> GetFileInfoByServerRelativeUrl(this ClientContext clientContext, string fileRef)
+        {
+            var file = clientContext.Web.GetFileByServerRelativeUrl(fileRef);
+            clientContext.Load(file, f => f.Name, f => f.ListItemAllFields.Id);
+            await clientContext.ExecuteQueryAsync();
+
+            return new SharePointDocumentInfo(file.ListItemAllFields.Id, 
+                                              file.Name, 
+                                              await clientContext.GetContentFile(file), 
+                                              true);
         }
     }
 }

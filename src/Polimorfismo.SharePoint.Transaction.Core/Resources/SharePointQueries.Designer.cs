@@ -22,14 +22,14 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class SharePointMessages {
+    public class SharePointQueries {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal SharePointMessages() {
+        internal SharePointQueries() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Polimorfismo.SharePoint.Transaction.Resources.SharePointMessages", typeof(SharePointMessages).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Polimorfismo.SharePoint.Transaction.Resources.SharePointQueries", typeof(SharePointQueries).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,29 +61,20 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to It was not possible to prepare the commands to save the data present in the execution context..
+        ///   Looks up a localized string similar to &lt;View&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name=&apos;FileRef&apos; /&gt;&lt;Value Type=&apos;Text&apos;&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;.
         /// </summary>
-        public static string ERR400 {
+        public static string QueryDocumentType {
             get {
-                return ResourceManager.GetString("ERR400", resourceCulture);
+                return ResourceManager.GetString("QueryDocumentType", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Document {0} not found..
+        ///   Looks up a localized string similar to &lt;View&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name=&apos;ID&apos; /&gt;&lt;Value Type=&apos;Counter&apos;&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;.
         /// </summary>
-        public static string ERR401 {
+        public static string QueryItemById {
             get {
-                return ResourceManager.GetString("ERR401", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Only folders can receive others documents..
-        /// </summary>
-        public static string ERR402 {
-            get {
-                return ResourceManager.GetString("ERR402", resourceCulture);
+                return ResourceManager.GetString("QueryItemById", resourceCulture);
             }
         }
     }
