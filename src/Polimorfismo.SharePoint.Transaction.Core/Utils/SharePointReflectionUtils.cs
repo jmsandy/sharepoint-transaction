@@ -27,7 +27,8 @@ namespace Polimorfismo.SharePoint.Transaction.Utils
     {
         #region Methods
 
-        public static Dictionary<string, object> GetSharePointDictionaryValues<TSharePointItem>(TSharePointItem item) where TSharePointItem : ISharePointItem
+        public static Dictionary<string, object> GetSharePointDictionaryValues<TSharePointMetadata>(TSharePointMetadata item) 
+            where TSharePointMetadata : ISharePointMetadata
         {
             var dictionary = new Dictionary<string, object>();
 
@@ -41,7 +42,8 @@ namespace Polimorfismo.SharePoint.Transaction.Utils
             return dictionary;
         }
 
-        public static Dictionary<string, object> GetSharePointReferencesDictionaryValues<TSharePointItem>(TSharePointItem item) where TSharePointItem : ISharePointItem
+        public static Dictionary<string, object> GetSharePointReferencesDictionaryValues<TSharePointMetadata>(TSharePointMetadata item) 
+            where TSharePointMetadata : ISharePointMetadata
         {
             var dictionary = new Dictionary<string, object>();
 
@@ -55,7 +57,8 @@ namespace Polimorfismo.SharePoint.Transaction.Utils
             return dictionary;
         }
 
-        public static Dictionary<string, object> GetSharePointUsersDictionaryValues<TSharePointItem>(TSharePointItem item) where TSharePointItem : ISharePointItem
+        public static Dictionary<string, object> GetSharePointUsersDictionaryValues<TSharePointMetadata>(TSharePointMetadata item) 
+            where TSharePointMetadata : ISharePointMetadata
         {
             var dictionary = new Dictionary<string, object>();
 

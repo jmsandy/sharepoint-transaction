@@ -27,17 +27,17 @@ namespace Polimorfismo.SharePoint.Transaction
     {
         #region Extensions - ISharePointItem
 
-        public static Dictionary<string, object> ToDictionary(this ISharePointItem item)
+        public static Dictionary<string, object> ToDictionary(this ISharePointMetadata item)
         {
             return SharePointReflectionUtils.GetSharePointDictionaryValues(item);
         }
 
-        public static Dictionary<string, object> GetReferences(this ISharePointItem item)
+        public static Dictionary<string, object> GetReferences(this ISharePointMetadata item)
         {
             return SharePointReflectionUtils.GetSharePointReferencesDictionaryValues(item);
         }
 
-        public static Dictionary<string, object> GetUserFields(this ISharePointItem item)
+        public static Dictionary<string, object> GetUserFields(this ISharePointMetadata item)
         {
             return SharePointReflectionUtils.GetSharePointUsersDictionaryValues(item);
         }

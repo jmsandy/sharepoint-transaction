@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -65,24 +66,30 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Methods
 
-        protected internal abstract Task DeleteItem<TSharePointItem>(int id)
+        public abstract Task<SharePointUser> GetUserByLogin(string login);
+
+        protected internal abstract Task<int> AddItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
             where TSharePointItem : ISharePointItem, new();
 
         protected internal abstract Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
             where TSharePointItem : ISharePointItem, new();
 
-        protected internal abstract Task<int> InsertItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
+        protected internal abstract Task DeleteItem<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new();
+
+        protected TSharePointMetadata CreateSharePointItem<TSharePointMetadata>()
+             where TSharePointMetadata : ISharePointMetadata, new() => SharePointItemFactory.Create<TSharePointMetadata>();
 
         protected internal abstract Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml)
             where TSharePointItem : ISharePointItem, new();
 
-        protected TSharePointItem CreateSharePointItem<TSharePointItem>()
-            where TSharePointItem : ISharePointItem, new() => SharePointItemFactory.Create<TSharePointItem>();
+        protected internal abstract Task<(int Id, List<string> CreatedFolders)> AddFile<TSharePointFile>(IReadOnlyDictionary<string, object> fields, string fileName, string folderName, Stream content, bool isUpdateFile)
+            where TSharePointFile : ISharePointFile, new();
 
-        public abstract Task<SharePointUser> GetUserByLogin(string login);
+        protected internal abstract Task RemoveFolders<TSharePointFile>(List<string> folders)
+            where TSharePointFile : ISharePointFile, new();
 
-        public abstract Task<SharePointDocumentInfo> GetDocuments(string documentLibraryName, string fileRef);
+        public abstract Task<SharePointDocumentInfo> GetFiles(string documentLibraryName, string fileRef);
 
         public async Task<TSharePointItem> GetItemById<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new()
@@ -94,19 +101,25 @@ namespace Polimorfismo.SharePoint.Transaction
         public void AddItem<TSharePointItem>(TSharePointItem sharePointItem)
             where TSharePointItem : ISharePointItem, new()
         {
-            EnqueueCommand<SharePointInsertCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
+            EnqueueCommand<SharePointAddItemCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
         }
 
         public void UpdateItem<TSharePointItem>(TSharePointItem sharePointItem)
             where TSharePointItem : ISharePointItem, new()
         {
-            EnqueueCommand<SharePointUpdateCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
+            EnqueueCommand<SharePointUpdateItemCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
         }
 
         public void DeleteItem<TSharePointItem>(TSharePointItem sharePointItem)
             where TSharePointItem : ISharePointItem, new()
         {
-            EnqueueCommand<SharePointDeleteCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
+            EnqueueCommand<SharePointDeleteItemCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
+        }
+
+        public void AddFile<TSharePointFile>(TSharePointFile SharePointFile)
+            where TSharePointFile : ISharePointFile, new()
+        {
+            EnqueueCommand<SharePointAddFileCommand<TSharePointFile>, TSharePointFile>(SharePointFile);
         }
 
         public async Task SaveChanges()
@@ -156,9 +169,9 @@ namespace Polimorfismo.SharePoint.Transaction
             }
         }
 
-        private void EnqueueCommand<TSharePointCommand, TSharePointItem>(ISharePointItem sharePointItem)
-            where TSharePointItem : ISharePointItem, new()
-            where TSharePointCommand : SharePointCommand<TSharePointItem>
+        private void EnqueueCommand<TSharePointCommand, TSharePointMetadata>(ISharePointMetadata sharePointItem)
+            where TSharePointMetadata : ISharePointMetadata, new()
+            where TSharePointCommand : SharePointCommand<TSharePointMetadata>
         {
             ISharePointCommand referenceCommand = null;
             foreach (var itemTracking in Tracking.Items)

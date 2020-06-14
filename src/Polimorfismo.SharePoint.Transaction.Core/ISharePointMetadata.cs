@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using Polimorfismo.SharePoint.Transaction.Utils;
 
 namespace Polimorfismo.SharePoint.Transaction
 {
     /// <summary>
-    /// Creates new instances of SharePointItem.
+    /// Interface representing the base of an item on the SharePoint. 
+    /// It can be having a representation for each operation to be performed.
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
-    /// <Date>2020-06-07 08:46:44 PM</Date>
-    internal static class SharePointItemFactory
+    /// <Date>2020-06-14 08:46:57 AM</Date>
+    public interface ISharePointMetadata
     {
-        public static TSharePointMetadata Create<TSharePointMetadata>()
-            where TSharePointMetadata : ISharePointMetadata, new()
-        {
-            return Activator.CreateInstance<TSharePointMetadata>();
-        }
+        [SharePointField(SharePointConstants.FieldNameId)]
+        int Id { get; set; }
+
+        string ListName { get; }
     }
 }

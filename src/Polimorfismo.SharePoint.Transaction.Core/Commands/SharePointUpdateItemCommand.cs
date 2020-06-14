@@ -19,22 +19,22 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
     /// <summary>
     /// Implements the update command with the following processes:
     ///     Prepare: obtains the original item;
-    ///     Execute: updates the item;
+    ///     Execute: update the item;
     ///     Undo: update the original item in case of failure.    
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-05-24 08:27:45 PM</Date>
-    internal class SharePointUpdateCommand<TSharePointItem> : SharePointCommand<TSharePointItem> 
+    internal class SharePointUpdateItemCommand<TSharePointItem> : SharePointCommand<TSharePointItem> 
         where TSharePointItem : ISharePointItem, new()
     {
         #region Constructors / Finalizers
 
-        public SharePointUpdateCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
+        public SharePointUpdateItemCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
             : base(sharePointClient, itemTracking)
         {
         }
 
-        ~SharePointUpdateCommand() => Dispose(false);
+        ~SharePointUpdateItemCommand() => Dispose(false);
 
         #endregion
 

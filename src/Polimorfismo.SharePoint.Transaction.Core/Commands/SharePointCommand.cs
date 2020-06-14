@@ -22,7 +22,8 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-05-24 08:22:42 PM</Date>
-    internal abstract class SharePointCommand<TSharePointItem> : ISharePointCommand where TSharePointItem : ISharePointItem
+    internal abstract class SharePointCommand<TSharePointMetadata> : ISharePointCommand 
+        where TSharePointMetadata : ISharePointMetadata
     {
         #region Properties
 

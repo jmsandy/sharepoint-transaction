@@ -106,6 +106,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SharePointAggregatingListItem.cs" />
+    <Compile Include="SharePointFile.cs" />
+    <Compile Include="SharePointFileUnitTest.cs" />
     <Compile Include="SharePointListItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SharePointBaseUnitTest.cs" />
@@ -127,6 +129,11 @@
       <Project>{84950e76-1cd5-4bb4-8887-c69c03b26b94}</Project>
       <Name>Polimorfismo.SharePointOnline.Transaction.CSOM</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SharePointFile.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

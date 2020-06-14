@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Polimorfismo.SharePoint.Transaction.Utils;
-
 namespace Polimorfismo.SharePoint.Transaction
 {
     /// <summary>
@@ -22,11 +20,7 @@ namespace Polimorfismo.SharePoint.Transaction
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-05-24 08:46:57 PM</Date>
-    public interface ISharePointItem
+    public interface ISharePointItem : ISharePointMetadata
     {
-        [SharePointField(SharePointConstants.FieldNameId)]
-        int Id { get; set; }
-
-        string ListName { get; }
     }
 }

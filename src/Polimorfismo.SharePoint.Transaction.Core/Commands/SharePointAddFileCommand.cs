@@ -13,27 +13,34 @@
 // limitations under the License.
 
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Polimorfismo.SharePoint.Transaction.Commands
 {
     /// <summary>
     /// Implements the insert command with the following processes:
-    ///     Execute: inserts the item;
-    ///     Undo: removes the inserted item.
+    ///     Execute: add the file;
+    ///     Undo: remove the inserted file.
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
-    /// <Date>2020-05-24 08:26:20 PM</Date>
-    internal class SharePointInsertCommand<TSharePointItem> : SharePointCommand<TSharePointItem>
-        where TSharePointItem : ISharePointItem, new()
+    /// <Date>2020-06-14 08:42:39 AM</Date>
+    internal class SharePointAddFileCommand<TSharePointFile> : SharePointCommand<TSharePointFile>
+        where TSharePointFile : ISharePointFile, new()
     {
+        #region Fields
+
+        private List<string> _createdFolders = null;
+
+        #endregion
+        
         #region Constructors / Finalizers
 
-        public SharePointInsertCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
+        public SharePointAddFileCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
             : base(sharePointClient, itemTracking)
         {
         }
 
-        ~SharePointInsertCommand() => Dispose(false);
+        ~SharePointAddFileCommand() => Dispose(false);
 
         #endregion
 
@@ -43,17 +50,20 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         public override async Task Execute()
         {
-            var id = await SharePointClient.InsertItem<TSharePointItem>(
-                SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking));
+            var SharePointFile = (ISharePointFile)SharePointItemTracking.Item;
 
-            SharePointItemTracking.Id = id;
+            var fileInfo = await SharePointClient.AddFile<TSharePointFile>(
+                SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking), 
+                SharePointFile.FileName, SharePointFile.Folder, SharePointFile.InputStream, false);
+
+            SharePointItemTracking.Id = fileInfo.Id;
+            _createdFolders = fileInfo.CreatedFolders;
         }
 
         public override async Task Undo()
         {
-            await SharePointClient.DeleteItem<TSharePointItem>(SharePointItemTracking.Id);
-
             SharePointItemTracking.Id = 0;
+            await SharePointClient.RemoveFolders<TSharePointFile>(_createdFolders);
         }
 
         #endregion

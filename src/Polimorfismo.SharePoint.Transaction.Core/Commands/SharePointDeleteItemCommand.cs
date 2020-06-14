@@ -19,22 +19,22 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
     /// <summary>
     /// Implements the delete command with the following processes:
     ///     Prepare: obtains the original item;
-    ///     Execute: removes the item;
-    ///     Undo: inserts the original item in case of failure.
+    ///     Execute: remove the item;
+    ///     Undo: insert the original item in case of failure.
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-05-24 08:28:58 PM</Date>
-    internal class SharePointDeleteCommand<TSharePointItem> : SharePointCommand<TSharePointItem> 
+    internal class SharePointDeleteItemCommand<TSharePointItem> : SharePointCommand<TSharePointItem> 
         where TSharePointItem : ISharePointItem, new()
     {
         #region Constructors / Finalizers
 
-        public SharePointDeleteCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
+        public SharePointDeleteItemCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
             : base(sharePointClient, itemTracking)
         {
         }
 
-        ~SharePointDeleteCommand() => Dispose(false);
+        ~SharePointDeleteItemCommand() => Dispose(false);
 
         #endregion
 
@@ -53,7 +53,7 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         public override async Task Undo()
         {
-            await SharePointClient.InsertItem<TSharePointItem>(SharePointItemTracking.OriginalFields.ToDictionary());
+            await SharePointClient.AddItem<TSharePointItem>(SharePointItemTracking.OriginalFields.ToDictionary());
         }
 
         #endregion

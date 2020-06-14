@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.IO;
 using System.Net;
 using System.Linq;
 using System.Threading.Tasks;
@@ -78,7 +79,131 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         #region SharePointClientBase - Members
 
-        public override async Task<SharePointDocumentInfo> GetDocuments(string documentLibraryName, string fileRef)
+        public override async Task<SharePointUser> GetUserByLogin(string login)
+        {
+            if (string.IsNullOrWhiteSpace(login)) throw new ArgumentNullException(nameof(login));
+
+            var sharePointUser = _users.FirstOrDefault(u => u.Login.Equals(login, StringComparison.InvariantCulture));
+            if (sharePointUser != null) return sharePointUser;
+
+            var user = ClientContext.Web.EnsureUser(login);
+            ClientContext.Load(user);
+            await ClientContext.ExecuteQueryAsync();
+
+            sharePointUser = new SharePointUser(user.Id, login, user.Email, user.Title);
+
+            _users.Add(sharePointUser);
+
+            return sharePointUser;
+        }
+
+        protected override async Task<int> AddItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
+        {
+            var itemCreateInfo = new ListItemCreationInformation();
+            var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).AddItem(itemCreateInfo);
+
+            return await Update(listItem, fields);
+        }
+
+        protected override async Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
+        {
+            await Update(ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id), fields);
+        }
+
+        protected override async Task DeleteItem<TSharePointItem>(int id)
+        {
+            var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id);
+            listItem.DeleteObject();
+
+            await ClientContext.ExecuteQueryAsync();
+        }
+
+        protected override async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml)
+        {
+            CamlQuery camlQuery = null;
+            if (!string.IsNullOrWhiteSpace(viewXml))
+            {
+                camlQuery = new CamlQuery() { ViewXml = viewXml };
+            }
+
+            return await GetItems<TSharePointItem>(camlQuery);
+        }
+
+        protected override async Task<(int Id, List<string> CreatedFolders)> AddFile<TSharePointFile>(IReadOnlyDictionary<string, object> fields,
+            string fileName, string folderName, Stream content, bool isUpdateFile)
+        {
+            var fileCreateInfo = new FileCreationInformation
+            {
+                Url = fileName,
+                ContentStream = content,
+                Overwrite = isUpdateFile
+            };
+
+            var documentLibrary = ClientContext.GetList(CreateSharePointItem<TSharePointFile>().ListName);
+
+            var folder = documentLibrary.RootFolder;
+
+            var baseFolder = "";
+            var createdFolders = new List<string>();
+            foreach (var name in (folderName ?? string.Empty).Split('/'))
+            {
+                baseFolder += $"/{name}";
+
+                ClientContext.Load(folder.Folders);
+                await ClientContext.ExecuteQueryAsync();
+
+                if (!folder.Folders.Any(f => f.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    folder = folder.Folders.Add(name);
+                    await ClientContext.ExecuteQueryAsync();
+
+                    createdFolders.Add(baseFolder.Substring(1));
+                }
+                else
+                {
+                    folder = folder.Folders.Single(f => f.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+                }
+            }
+
+            var file = folder.Files.Add(fileCreateInfo);
+
+            var id = await Update(file.ListItemAllFields, fields);
+
+            return (id, createdFolders);
+        }
+
+        protected override async Task RemoveFolders<TSharePointFile>(List<string> folders)
+        {
+            if (folders?.Count == 0) return;
+
+            var documentLibrary = ClientContext.GetList(CreateSharePointItem<TSharePointFile>().ListName);
+
+            folders.Reverse();
+            foreach (var folderPath in folders)
+            {
+                var folder = documentLibrary.RootFolder;
+                foreach (var name in (folderPath ?? string.Empty).Split('/'))
+                {
+                    ClientContext.Load(folder.Folders);
+                    await ClientContext.ExecuteQueryAsync();
+
+                    if (!folder.Folders.Any(f => f.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))) 
+                    {
+                        folder = null;
+                        break;
+                    }
+                    folder = folder.Folders.Single(f => f.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+                }
+                if (folder != null && !documentLibrary.RootFolder.Equals(folder))
+                {
+                    folder.DeleteObject();
+                }
+            }
+
+            await ClientContext.ExecuteQueryAsync();
+        }
+
+        public override async Task<SharePointDocumentInfo> GetFiles(string documentLibraryName, string fileRef)
         {
             SharePointDocumentInfo documentInfo = null;
 
@@ -117,10 +242,10 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
                         .OrderBy(document => document.Level)
                         .ToList().ForEach(document =>
                         {
-                            var sharePointDocumentInfo = new SharePointDocumentInfo(document.Id, document.Name, null, false);
-                            folders[document.Owner].AddDocument(sharePointDocumentInfo);
+                            var sharePointFileInfo = new SharePointDocumentInfo(document.Id, document.Name, null, false);
+                            folders[document.Owner].AddDocument(sharePointFileInfo);
 
-                            folders.Add($"{document.Owner}/{document.Name}", sharePointDocumentInfo);
+                            folders.Add($"{document.Owner}/{document.Name}", sharePointFileInfo);
                         });
 
                     foreach (var document in documents.Where(document => !document.Isfolder).ToList())
@@ -133,61 +258,10 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return documentInfo;
         }
 
-        public override async Task<SharePointUser> GetUserByLogin(string login)
-        {
-            if (string.IsNullOrWhiteSpace(login)) throw new ArgumentNullException(nameof(login));
-
-            var sharePointUser = _users.FirstOrDefault(u => u.Login.Equals(login, StringComparison.InvariantCulture));
-            if (sharePointUser != null) return sharePointUser;
-
-            var user = ClientContext.Web.EnsureUser(login);
-            ClientContext.Load(user);
-            await ClientContext.ExecuteQueryAsync();
-
-            sharePointUser = new SharePointUser(user.Id, login, user.Email, user.Title);
-
-            _users.Add(sharePointUser);
-
-            return sharePointUser;
-        }
-
-        protected override async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml)
-        {
-            CamlQuery camlQuery = null;
-            if (!string.IsNullOrWhiteSpace(viewXml))
-            {
-                camlQuery = new CamlQuery() { ViewXml = viewXml };
-            }
-
-            return await GetItems<TSharePointItem>(camlQuery);
-        }
-
-        protected override async Task DeleteItem<TSharePointItem>(int id)
-        {
-            var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id);
-            listItem.DeleteObject();
-
-            await ClientContext.ExecuteQueryAsync();
-        }
-
-        protected override async Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
-        {
-            await Update(ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id), fields);
-        }
-
-
-        protected override async Task<int> InsertItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
-        {
-            var itemCreateInfo = new ListItemCreationInformation();
-            var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).AddItem(itemCreateInfo);
-
-            return await Update(listItem, fields);
-        }
-
         #endregion
 
         #region Methods
-        
+
         public async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(CamlQuery camlQuery = null,
             params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointItem : ISharePointItem, new()
         {
@@ -209,15 +283,15 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
                     items = listItemCollection.ToKnowType<TSharePointItem>(clientContext);
                 }
             }
-            
+
             return items;
         }
 
         protected Uri GetBaseSharePointUri() => new Uri(new Uri(_webFullUrl).GetLeftPart(UriPartial.Path));
 
-        protected string GetDocumentUri(string documentUri) => 
-            Uri.IsWellFormedUriString(documentUri, UriKind.Relative) 
-                ? documentUri 
+        protected string GetDocumentUri(string documentUri) =>
+            Uri.IsWellFormedUriString(documentUri, UriKind.Relative)
+                ? documentUri
                 : Uri.UnescapeDataString(new Uri(GetBaseSharePointUri(), documentUri).AbsolutePath);
 
         protected async Task<int> Update(ListItem listItem, IReadOnlyDictionary<string, object> fields)

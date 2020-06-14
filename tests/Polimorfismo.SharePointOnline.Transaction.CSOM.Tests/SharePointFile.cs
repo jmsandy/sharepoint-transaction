@@ -12,21 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using System.IO;
+using Polimorfismo.SharePoint.Transaction;
 
-namespace Polimorfismo.SharePoint.Transaction
+namespace Polimorfismo.SharePointOnline.Transaction.Tests
 {
     /// <summary>
-    /// Creates new instances of SharePointItem.
+    /// Represents a document in SharePoint.
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
-    /// <Date>2020-06-07 08:46:44 PM</Date>
-    internal static class SharePointItemFactory
+    /// <Date>2020-06-07 09:10:18 AM</Date>
+    internal class SharePointFile : ISharePointFile
     {
-        public static TSharePointMetadata Create<TSharePointMetadata>()
-            where TSharePointMetadata : ISharePointMetadata, new()
-        {
-            return Activator.CreateInstance<TSharePointMetadata>();
-        }
+        public string ListName => "DocumentsList";
+
+        public int Id { get; set; }
+
+        [SharePointField("Description0")]
+        public string Description { get; set; }
+
+        public string Folder { get; set; }
+
+        public string FileName { get; set; }
+
+        public Stream InputStream { get; set; }
     }
 }

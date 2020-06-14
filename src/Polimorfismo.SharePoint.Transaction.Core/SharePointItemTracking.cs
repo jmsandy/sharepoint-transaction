@@ -25,7 +25,7 @@ namespace Polimorfismo.SharePoint.Transaction
     {
         #region Properties
 
-        public ISharePointItem Item { get; }
+        public ISharePointMetadata Item { get; }
 
         public SharePointFields Fields { get; }
 
@@ -43,7 +43,7 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Constructors / Finalizers
 
-        public SharePointItemTracking(ISharePointItem item)
+        public SharePointItemTracking(ISharePointMetadata item)
         {
             Item = item;
             Fields = new SharePointFields(item);
