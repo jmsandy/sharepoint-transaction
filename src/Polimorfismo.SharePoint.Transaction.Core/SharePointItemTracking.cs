@@ -31,6 +31,8 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public SharePointFields OriginalFields { get; private set; }
 
+        public ISharePointMetadata OriginalItem { get; private set; }
+
         public bool IsOriginalItemLoaded { get; private set; } = false;
 
         public int Id
@@ -53,10 +55,11 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Methods
 
-        public void LoadOriginalItem(SharePointFields originalItem)
+        public void LoadOriginalItem(ISharePointMetadata originalItem)
         {
             IsOriginalItemLoaded = true;
-            OriginalFields = originalItem;
+            OriginalItem = originalItem;
+            OriginalFields = new SharePointFields(originalItem);
         }
 
         #endregion

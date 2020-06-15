@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.SharePoint.Client;
 using Polimorfismo.SharePoint.Transaction;
+using Polimorfismo.SharePoint.Transaction.Utils;
 using Polimorfismo.SharePoint.Transaction.Resources;
 
 namespace Polimorfismo.Microsoft.SharePoint.Transaction
@@ -30,14 +31,12 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
     /// <Date>2020-05-25 10:04:15 PM</Date>
     internal static class SharePointClientExtensions
     {
-        public static TSharePointItem CopyListItemTo<TSharePointItem>(this ClientContext clientContext, ListItem listItem) where TSharePointItem : ISharePointItem
+        public static TSharePointMetadata CopyListItemTo<TSharePointMetadata>(this ClientContext clientContext, ListItem listItem) 
+            where TSharePointMetadata : ISharePointMetadata
         {
-            if (listItem == null)
-            {
-                throw new ArgumentNullException("listItem");
-            }
+            if (listItem == null) throw new ArgumentNullException(nameof(listItem));
 
-            var item = Activator.CreateInstance<TSharePointItem>();
+            var item = Activator.CreateInstance<TSharePointMetadata>();
             item.Id = listItem.Id;
 
             foreach (var property in item.GetType()
@@ -83,16 +82,29 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return item;
         }
 
-        public static List<TSharePointItem> ToKnowType<TSharePointItem>(this ListItemCollection listItemCollection, ClientContext clientContext)
-            where TSharePointItem : ISharePointItem
+        public static List<TSharePointMetadata> ToKnowType<TSharePointMetadata>(this ListItemCollection listItemCollection, ClientContext clientContext)
+            where TSharePointMetadata : ISharePointMetadata
         {
-            var items = Activator.CreateInstance<List<TSharePointItem>>();
+             var items = Activator.CreateInstance<List<TSharePointMetadata>>();
 
             if (listItemCollection != null)
             {
                 foreach (var listItem in listItemCollection)
                 {
-                    items.Add(CopyListItemTo<TSharePointItem>(clientContext, listItem));
+                    var item = CopyListItemTo<TSharePointMetadata>(clientContext, listItem);
+                    items.Add(item);
+
+                    if (item is ISharePointFile
+                        && listItem[SharePointConstants.FieldNameFileRef] != null
+                        && listItem[SharePointConstants.FieldNameFileDirRef] != null)
+                    {
+                        var file = (ISharePointFile)item;
+                        var fileInfo = clientContext.GetFileInfoByServerRelativeUrl(listItem[SharePointConstants.FieldNameFileRef].ToString()).GetAwaiter().GetResult();
+                        file.FileName = fileInfo.Name;                        
+                        file.InputStream = new System.IO.MemoryStream(fileInfo.Content);
+                        file.Folder = listItem[SharePointConstants.FieldNameFileDirRef].ToString();
+                        file.Folder = file.Folder.Substring(file.Folder.IndexOf(file.ListName) + file.ListName.Length + 1);
+                    }
                 }
             }
 

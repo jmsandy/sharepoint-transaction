@@ -17,24 +17,24 @@ using System.Threading.Tasks;
 namespace Polimorfismo.SharePoint.Transaction.Commands
 {
     /// <summary>
-    /// Implements the update command with the following processes:
-    ///     Prepare: obtains the original item;
-    ///     Execute: update the item;
-    ///     Undo: update the original item in case of failure.    
+    /// Implements the delete command with the following processes:
+    ///     Prepare: obtains the original file;
+    ///     Execute: remove the file;
+    ///     Undo: insert the original file in case of failure.
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
-    /// <Date>2020-05-24 08:27:45 PM</Date>
-    internal class SharePointUpdateItemCommand<TSharePointItem> : SharePointCommand<TSharePointItem> 
-        where TSharePointItem : ISharePointItem, new()
+    /// <Date>2020-06-14 09:20:49 PM</Date>
+    internal class SharePointDeleteFileCommand<TSharePointFile> : SharePointCommand<TSharePointFile>
+        where TSharePointFile : ISharePointFile, new()
     {
         #region Constructors / Finalizers
 
-        public SharePointUpdateItemCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
+        public SharePointDeleteFileCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
             : base(sharePointClient, itemTracking)
         {
         }
 
-        ~SharePointUpdateItemCommand() => Dispose(false);
+        ~SharePointDeleteFileCommand() => Dispose(false);
 
         #endregion
 
@@ -42,20 +42,22 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         public override async Task Prepare()
         {
-            await SharePointItemTracking.ConfigureUserFields(SharePointClient);
-
-            var item = await SharePointClient.GetItemById<TSharePointItem>(SharePointItemTracking.Id);
+            var item = await SharePointClient.GetFileById<TSharePointFile>(SharePointItemTracking.Id);
             SharePointItemTracking.LoadOriginalItem(item);
         }
 
         public override async Task Execute()
         {
-            await SharePointClient.UpdateItem<TSharePointItem>(SharePointItemTracking.Id, SharePointItemTracking.Fields.ToDictionary());
+            await SharePointClient.DeleteFile<TSharePointFile>(SharePointItemTracking.Id);
         }
 
         public override async Task Undo()
         {
-            await SharePointClient.UpdateItem<TSharePointItem>(SharePointItemTracking.Id, SharePointItemTracking.Fields.ToDictionary());
+            var sharePointFile = (ISharePointFile)SharePointItemTracking.OriginalItem;
+
+            await SharePointClient.AddFile<TSharePointFile>(
+                SharePointItemTracking.OriginalFields.ToDictionary(),
+                sharePointFile.FileName, sharePointFile.Folder, sharePointFile.InputStream, false);
         }
 
         #endregion

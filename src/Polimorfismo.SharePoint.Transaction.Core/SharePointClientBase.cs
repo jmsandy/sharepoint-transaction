@@ -80,16 +80,26 @@ namespace Polimorfismo.SharePoint.Transaction
         protected TSharePointMetadata CreateSharePointItem<TSharePointMetadata>()
              where TSharePointMetadata : ISharePointMetadata, new() => SharePointItemFactory.Create<TSharePointMetadata>();
 
-        protected internal abstract Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml)
-            where TSharePointItem : ISharePointItem, new();
+        protected internal abstract Task<ICollection<TSharePointMetadata>> GetItems<TSharePointMetadata>(string viewXml)
+            where TSharePointMetadata : ISharePointMetadata, new();
 
         protected internal abstract Task<(int Id, List<string> CreatedFolders)> AddFile<TSharePointFile>(IReadOnlyDictionary<string, object> fields, string fileName, string folderName, Stream content, bool isUpdateFile)
+            where TSharePointFile : ISharePointFile, new();
+
+        protected internal abstract Task DeleteFile<TSharePointFile>(int id)
             where TSharePointFile : ISharePointFile, new();
 
         protected internal abstract Task RemoveFolders<TSharePointFile>(List<string> folders)
             where TSharePointFile : ISharePointFile, new();
 
         public abstract Task<SharePointDocumentInfo> GetFiles(string documentLibraryName, string fileRef);
+
+        public async Task<TSharePointFile> GetFileById<TSharePointFile>(int id)
+            where TSharePointFile : ISharePointFile, new()
+        {
+            var files = await GetItems<TSharePointFile>(string.Format(SharePointQueries.QueryItemById, id));
+            return files.FirstOrDefault();
+        }
 
         public async Task<TSharePointItem> GetItemById<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new()
@@ -116,10 +126,16 @@ namespace Polimorfismo.SharePoint.Transaction
             EnqueueCommand<SharePointDeleteItemCommand<TSharePointItem>, TSharePointItem>(sharePointItem);
         }
 
-        public void AddFile<TSharePointFile>(TSharePointFile SharePointFile)
+        public void AddFile<TSharePointFile>(TSharePointFile sharePointFile)
             where TSharePointFile : ISharePointFile, new()
         {
-            EnqueueCommand<SharePointAddFileCommand<TSharePointFile>, TSharePointFile>(SharePointFile);
+            EnqueueCommand<SharePointAddFileCommand<TSharePointFile>, TSharePointFile>(sharePointFile);
+        }
+
+        public void DeleteFile<TSharePointFile>(TSharePointFile sharePointFile)
+            where TSharePointFile : ISharePointFile, new()
+        {
+            EnqueueCommand<SharePointDeleteFileCommand<TSharePointFile>, TSharePointFile>(sharePointFile);
         }
 
         public async Task SaveChanges()

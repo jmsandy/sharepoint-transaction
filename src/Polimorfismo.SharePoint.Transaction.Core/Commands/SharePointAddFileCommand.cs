@@ -50,20 +50,22 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         public override async Task Execute()
         {
-            var SharePointFile = (ISharePointFile)SharePointItemTracking.Item;
+            var sharePointFile = (ISharePointFile)SharePointItemTracking.Item;
 
             var fileInfo = await SharePointClient.AddFile<TSharePointFile>(
                 SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking), 
-                SharePointFile.FileName, SharePointFile.Folder, SharePointFile.InputStream, false);
+                sharePointFile.FileName, sharePointFile.Folder, sharePointFile.InputStream, false);
 
             SharePointItemTracking.Id = fileInfo.Id;
             _createdFolders = fileInfo.CreatedFolders;
         }
 
         public override async Task Undo()
-        {
-            SharePointItemTracking.Id = 0;
+        {   
+            await SharePointClient.DeleteFile<TSharePointFile>(SharePointItemTracking.Id);
             await SharePointClient.RemoveFolders<TSharePointFile>(_createdFolders);
+
+            SharePointItemTracking.Id = 0;
         }
 
         #endregion

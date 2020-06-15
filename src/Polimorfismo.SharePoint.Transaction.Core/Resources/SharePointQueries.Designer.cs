@@ -79,7 +79,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;View&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name=&apos;ID&apos; /&gt;&lt;Value Type=&apos;Counter&apos;&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;.
+        ///   Looks up a localized string similar to &lt;View Scope=&quot;RecursiveAll&quot;&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name=&apos;ID&apos; /&gt;&lt;Value Type=&apos;Counter&apos;&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;.
         /// </summary>
         public static string QueryItemById {
             get {

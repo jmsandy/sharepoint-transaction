@@ -112,13 +112,10 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         protected override async Task DeleteItem<TSharePointItem>(int id)
         {
-            var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id);
-            listItem.DeleteObject();
-
-            await ClientContext.ExecuteQueryAsync();
+            await Delete<TSharePointItem>(id);
         }
 
-        protected override async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(string viewXml)
+        protected override async Task<ICollection<TSharePointMetadata>> GetItems<TSharePointMetadata>(string viewXml)
         {
             CamlQuery camlQuery = null;
             if (!string.IsNullOrWhiteSpace(viewXml))
@@ -126,7 +123,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
                 camlQuery = new CamlQuery() { ViewXml = viewXml };
             }
 
-            return await GetItems<TSharePointItem>(camlQuery);
+            return await GetItemsByCamlQuery<TSharePointMetadata>(camlQuery);
         }
 
         protected override async Task<(int Id, List<string> CreatedFolders)> AddFile<TSharePointFile>(IReadOnlyDictionary<string, object> fields,
@@ -170,6 +167,11 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             var id = await Update(file.ListItemAllFields, fields);
 
             return (id, createdFolders);
+        }
+
+        protected override async Task DeleteFile<TSharePointFile>(int id)
+        {
+            await Delete<TSharePointFile>(id);
         }
 
         protected override async Task RemoveFolders<TSharePointFile>(List<string> folders)
@@ -262,25 +264,37 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         #region Methods
 
+        public async Task<ICollection<TSharePointFile>> GetFiles<TSharePointFile>(CamlQuery camlQuery = null,
+            params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointFile : ISharePointFile, new()
+        {
+            return await GetItemsByCamlQuery<TSharePointFile>(camlQuery, retrievals);
+        }
+
         public async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(CamlQuery camlQuery = null,
             params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointItem : ISharePointItem, new()
         {
-            List<TSharePointItem> items = null;
-            ListItemCollection listItemCollection;
+            return await GetItemsByCamlQuery<TSharePointItem>(camlQuery, retrievals);
+        }
+
+        protected async Task<ICollection<TSharePointMetadata>> GetItemsByCamlQuery<TSharePointMetadata>(CamlQuery camlQuery = null,
+            params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointMetadata : ISharePointMetadata, new()
+        {
+            List<TSharePointMetadata> items = null;
 
             using (var clientContext = new ClientContext(_webFullUrl))
             {
                 clientContext.Credentials = _networkCredential;
 
-                var listWithContent = clientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName);
+                var listName = CreateSharePointItem<TSharePointMetadata>().ListName;
+                var listWithContent = clientContext.GetList(listName);
 
-                listItemCollection = listWithContent.GetItems(camlQuery ?? CamlQuery.CreateAllItemsQuery());
+                var listItemCollection = listWithContent.GetItems(camlQuery ?? CamlQuery.CreateAllItemsQuery());
                 clientContext.Load(listItemCollection, retrievals);
                 await clientContext.ExecuteQueryAsync();
 
                 if (listItemCollection != null)
                 {
-                    items = listItemCollection.ToKnowType<TSharePointItem>(clientContext);
+                    items = listItemCollection.ToKnowType<TSharePointMetadata>(clientContext);
                 }
             }
 
@@ -293,6 +307,14 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             Uri.IsWellFormedUriString(documentUri, UriKind.Relative)
                 ? documentUri
                 : Uri.UnescapeDataString(new Uri(GetBaseSharePointUri(), documentUri).AbsolutePath);
+
+        protected async Task Delete<TSharePointMetadata>(int id) where TSharePointMetadata : ISharePointMetadata, new()
+        {
+            var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointMetadata>().ListName).GetItemById(id);
+
+            listItem.DeleteObject();
+            await ClientContext.ExecuteQueryAsync();
+        }
 
         protected async Task<int> Update(ListItem listItem, IReadOnlyDictionary<string, object> fields)
         {
