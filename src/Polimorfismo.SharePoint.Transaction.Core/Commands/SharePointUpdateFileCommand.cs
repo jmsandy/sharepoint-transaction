@@ -18,23 +18,23 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 {
     /// <summary>
     /// Implements the update command with the following processes:
-    ///     Prepare: obtains the original item;
-    ///     Execute: update the item;
-    ///     Undo: update the original item in case of failure.    
+    ///     Prepare: obtains the original file;
+    ///     Execute: update the file;
+    ///     Undo: update the original file in case of failure.    
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
-    /// <Date>2020-05-24 08:27:45 PM</Date>
-    internal class SharePointUpdateItemCommand<TSharePointItem> : SharePointCommand<TSharePointItem> 
-        where TSharePointItem : ISharePointItem, new()
+    /// <Date>2020-06-15 07:19:12 PM</Date>
+    internal class SharePointUpdateFileCommand<TSharePointFile> : SharePointCommand<TSharePointFile>
+        where TSharePointFile : ISharePointFile, new()
     {
         #region Constructors / Finalizers
 
-        public SharePointUpdateItemCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
+        public SharePointUpdateFileCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
             : base(sharePointClient, itemTracking)
         {
         }
 
-        ~SharePointUpdateItemCommand() => Dispose(false);
+        ~SharePointUpdateFileCommand() => Dispose(false);
 
         #endregion
 
@@ -44,18 +44,26 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
         {
             await SharePointItemTracking.ConfigureUserFields(SharePointClient);
 
-            var item = await SharePointClient.GetItemById<TSharePointItem>(SharePointItemTracking.Id);
+            var item = await SharePointClient.GetFileById<TSharePointFile>(SharePointItemTracking.Id);
             SharePointItemTracking.LoadOriginalItem(item);
         }
 
         public override async Task Execute()
         {
-            await SharePointClient.UpdateItem<TSharePointItem>(SharePointItemTracking.Id, SharePointItemTracking.Fields.ToDictionary());
+            var sharePointFile = (ISharePointFile)SharePointItemTracking.Item;
+
+            await SharePointClient.AddFile<TSharePointFile>(
+                SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking),
+                sharePointFile.FileName, sharePointFile.Folder, sharePointFile.InputStream, true);
         }
 
         public override async Task Undo()
         {
-            await SharePointClient.UpdateItem<TSharePointItem>(SharePointItemTracking.Id, SharePointItemTracking.OriginalFields.ToDictionary());
+            var sharePointFile = (ISharePointFile)SharePointItemTracking.OriginalItem;
+
+            await SharePointClient.AddFile<TSharePointFile>(
+                SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking, true),
+                sharePointFile.FileName, sharePointFile.Folder, sharePointFile.InputStream, true);
         }
 
         #endregion

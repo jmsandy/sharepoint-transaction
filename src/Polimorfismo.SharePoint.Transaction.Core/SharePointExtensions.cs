@@ -54,9 +54,10 @@ namespace Polimorfismo.SharePoint.Transaction
             }
         }
 
-        public static IReadOnlyDictionary<string, object> ConfigureReferences(this SharePointItemTracking itemTracking, SharePointListItemTracking listTracking)
+        public static IReadOnlyDictionary<string, object> ConfigureReferences(this SharePointItemTracking itemTracking, 
+            SharePointListItemTracking listTracking, bool isOriginalFields = false)
         {
-            var fields = itemTracking.Fields.ToDictionary();
+            var fields = isOriginalFields ? itemTracking.OriginalFields.ToDictionary() : itemTracking.Fields.ToDictionary();
 
             foreach (var reference in itemTracking.Item.GetReferences())
             {

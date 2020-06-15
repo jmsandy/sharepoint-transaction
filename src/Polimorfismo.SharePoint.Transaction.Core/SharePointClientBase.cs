@@ -132,6 +132,12 @@ namespace Polimorfismo.SharePoint.Transaction
             EnqueueCommand<SharePointAddFileCommand<TSharePointFile>, TSharePointFile>(sharePointFile);
         }
 
+        public void UpdateFile<TSharePointFile>(TSharePointFile sharePointFile)
+            where TSharePointFile : ISharePointFile, new()
+        {
+            EnqueueCommand<SharePointUpdateFileCommand<TSharePointFile>, TSharePointFile>(sharePointFile);
+        }
+
         public void DeleteFile<TSharePointFile>(TSharePointFile sharePointFile)
             where TSharePointFile : ISharePointFile, new()
         {
