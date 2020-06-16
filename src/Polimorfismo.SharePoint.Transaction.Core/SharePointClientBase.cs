@@ -17,9 +17,12 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Polimorfismo.SharePoint.Transaction.Utils;
 using Polimorfismo.SharePoint.Transaction.Commands;
 using Polimorfismo.SharePoint.Transaction.Resources;
+
+[assembly: InternalsVisibleTo("Polimorfismo.SharePointOnline.Transaction.CSOM.Tests")]
 
 namespace Polimorfismo.SharePoint.Transaction
 {
@@ -83,8 +86,8 @@ namespace Polimorfismo.SharePoint.Transaction
         protected internal abstract Task<ICollection<TSharePointMetadata>> GetItems<TSharePointMetadata>(string viewXml)
             where TSharePointMetadata : ISharePointMetadata, new();
 
-        protected internal abstract Task<(int Id, List<string> CreatedFolders)> AddFile<TSharePointFile>(IReadOnlyDictionary<string, object> fields, string fileName, string folderName, Stream content, bool isUpdateFile)
-            where TSharePointFile : ISharePointFile, new();
+        protected internal abstract Task<(int Id, List<string> CreatedFolders)> AddFile<TSharePointFile>(IReadOnlyDictionary<string, object> fields, 
+            string fileName, string folderName, Stream content, bool isUpdateFile) where TSharePointFile : ISharePointFile, new();
 
         protected internal abstract Task DeleteFile<TSharePointFile>(int id)
             where TSharePointFile : ISharePointFile, new();
@@ -222,7 +225,8 @@ namespace Polimorfismo.SharePoint.Transaction
 
             _sharePointBackgroundTasks.Action(() =>
             {
-                command.Prepare().Wait();
+                command.Prepare().GetAwaiter().GetResult();
+                _sharePointBackgroundTasks.Token.ThrowIfCancellationRequested();
             });
         }
 

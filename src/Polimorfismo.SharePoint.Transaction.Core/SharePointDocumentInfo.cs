@@ -60,7 +60,7 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public void AddDocuments(IEnumerable<SharePointDocumentInfo> documents)
         {
-            if (IsFile) _documents.AddRange(documents);
+            if (!IsFile) _documents.AddRange(documents);
 
             throw new SharePointException(SharePointErrorCode.OnlyFoldersCanReceiveDocuments, SharePointMessages.ERR402);
         }

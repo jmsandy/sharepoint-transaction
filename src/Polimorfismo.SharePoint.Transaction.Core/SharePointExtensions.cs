@@ -29,17 +29,17 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public static Dictionary<string, object> ToDictionary(this ISharePointMetadata item)
         {
-            return SharePointReflectionUtils.GetSharePointDictionaryValues(item);
+            return SharePointReflectionUtils.GetSharePointFieldsDictionary(item);
         }
 
         public static Dictionary<string, object> GetReferences(this ISharePointMetadata item)
         {
-            return SharePointReflectionUtils.GetSharePointReferencesDictionaryValues(item);
+            return SharePointReflectionUtils.GetSharePointReferencesDictionary(item);
         }
 
         public static Dictionary<string, object> GetUserFields(this ISharePointMetadata item)
         {
-            return SharePointReflectionUtils.GetSharePointUsersDictionaryValues(item);
+            return SharePointReflectionUtils.GetSharePointUsersDictionary(item);
         }
 
         public static async Task ConfigureUserFields(this SharePointItemTracking itemTracking, SharePointClientBase sharePointClient)

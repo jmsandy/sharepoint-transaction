@@ -54,9 +54,9 @@ namespace Polimorfismo.SharePoint.Transaction
             Tasks.Add(Task.Run(action, Token));
         }
 
-        public void Wait(int timeout)
+        public void Wait(int seconds)
         {
-            _ = Task.WhenAny(Task.WhenAll(Tasks), Task.Delay(TimeSpan.FromSeconds(timeout))).Result;
+            _ = Task.WhenAny(Task.WhenAll(Tasks), Task.Delay(TimeSpan.FromSeconds(seconds))).Result;
         }
 
         public void Cancel()
