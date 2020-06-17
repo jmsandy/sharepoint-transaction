@@ -79,7 +79,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         #region SharePointClientBase - Members
 
-        public override async Task<SharePointUser> GetUserByLogin(string login)
+        public override async Task<SharePointUser> GetUserByLoginAsync(string login)
         {
             if (string.IsNullOrWhiteSpace(login)) throw new ArgumentNullException(nameof(login));
 
@@ -97,7 +97,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return sharePointUser;
         }
 
-        protected override async Task<int> AddItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
+        protected override async Task<int> AddItemAsync<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
         {
             var itemCreateInfo = new ListItemCreationInformation();
             var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).AddItem(itemCreateInfo);
@@ -105,17 +105,17 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return await Update(listItem, fields);
         }
 
-        protected override async Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
+        protected override async Task UpdateItemAsync<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
         {
             await Update(ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id), fields);
         }
 
-        protected override async Task DeleteItem<TSharePointItem>(int id)
+        protected override async Task DeleteItemAsync<TSharePointItem>(int id)
         {
             await Delete<TSharePointItem>(id);
         }
 
-        protected override async Task<ICollection<TSharePointMetadata>> GetItems<TSharePointMetadata>(string viewXml)
+        protected override async Task<ICollection<TSharePointMetadata>> GetItemsAsync<TSharePointMetadata>(string viewXml)
         {
             CamlQuery camlQuery = null;
             if (!string.IsNullOrWhiteSpace(viewXml))
@@ -126,7 +126,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return await GetItemsByCamlQuery<TSharePointMetadata>(camlQuery);
         }
 
-        protected override async Task<(int Id, List<string> CreatedFolders)> AddFile<TSharePointFile>(IReadOnlyDictionary<string, object> fields,
+        protected override async Task<(int Id, List<string> CreatedFolders)> AddFileAsync<TSharePointFile>(IReadOnlyDictionary<string, object> fields,
             string fileName, string folderName, Stream content, bool isUpdateFile)
         {
             var fileCreateInfo = new FileCreationInformation
@@ -169,12 +169,12 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return (id, createdFolders);
         }
 
-        protected override async Task DeleteFile<TSharePointFile>(int id)
+        protected override async Task DeleteFileAsync<TSharePointFile>(int id)
         {
             await Delete<TSharePointFile>(id);
         }
 
-        protected override async Task RemoveFolders<TSharePointFile>(List<string> folders)
+        protected override async Task RemoveFoldersAsync<TSharePointFile>(List<string> folders)
         {
             if (folders?.Count == 0) return;
 
@@ -205,7 +205,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             await ClientContext.ExecuteQueryAsync();
         }
 
-        public override async Task<SharePointDocumentInfo> GetFiles(string documentLibraryName, string fileRef)
+        public override async Task<SharePointDocumentInfo> GetFilesAsync(string documentLibraryName, string fileRef)
         {
             SharePointDocumentInfo documentInfo = null;
 
@@ -264,13 +264,25 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         #region Methods
 
-        public async Task<ICollection<TSharePointFile>> GetFiles<TSharePointFile>(CamlQuery camlQuery = null,
+        public ICollection<TSharePointFile> GetFiles<TSharePointFile>(CamlQuery camlQuery = null,
+            params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointFile : ISharePointFile, new()
+        {
+            return GetFilesAsync<TSharePointFile>(camlQuery, retrievals).GetAwaiter().GetResult();
+        }
+
+        public async Task<ICollection<TSharePointFile>> GetFilesAsync<TSharePointFile>(CamlQuery camlQuery = null,
             params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointFile : ISharePointFile, new()
         {
             return await GetItemsByCamlQuery<TSharePointFile>(camlQuery, retrievals);
         }
 
-        public async Task<ICollection<TSharePointItem>> GetItems<TSharePointItem>(CamlQuery camlQuery = null,
+        public ICollection<TSharePointItem> GetItems<TSharePointItem>(CamlQuery camlQuery = null,
+            params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointItem : ISharePointItem, new()
+        {
+            return GetItemsAsync<TSharePointItem>(camlQuery, retrievals).GetAwaiter().GetResult();
+        }
+
+        public async Task<ICollection<TSharePointItem>> GetItemsAsync<TSharePointItem>(CamlQuery camlQuery = null,
             params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointItem : ISharePointItem, new()
         {
             return await GetItemsByCamlQuery<TSharePointItem>(camlQuery, retrievals);

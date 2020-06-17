@@ -25,6 +25,11 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
     /// <Date>2020-06-07 10:00:34 PM</Date>
     public static class TestExtensions
     {
+        public static void ShoudBeNull(this object actual)
+        {
+            Assert.Null(actual);
+        }
+
         public static void ShouldBeTrue(this bool b)
         {
             Assert.True(b);

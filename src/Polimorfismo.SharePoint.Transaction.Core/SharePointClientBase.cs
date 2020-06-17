@@ -69,45 +69,67 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Methods
 
-        public abstract Task<SharePointUser> GetUserByLogin(string login);
+        public SharePointUser GetUserByLogin(string login)
+        {
+            return GetUserByLoginAsync(login).GetAwaiter().GetResult();
+        }
 
-        protected internal abstract Task<int> AddItem<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
+        public abstract Task<SharePointUser> GetUserByLoginAsync(string login);
+
+        protected internal abstract Task<int> AddItemAsync<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
             where TSharePointItem : ISharePointItem, new();
 
-        protected internal abstract Task UpdateItem<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
+        protected internal abstract Task UpdateItemAsync<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
             where TSharePointItem : ISharePointItem, new();
 
-        protected internal abstract Task DeleteItem<TSharePointItem>(int id)
+        protected internal abstract Task DeleteItemAsync<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new();
 
         protected TSharePointMetadata CreateSharePointItem<TSharePointMetadata>()
              where TSharePointMetadata : ISharePointMetadata, new() => SharePointItemFactory.Create<TSharePointMetadata>();
 
-        protected internal abstract Task<ICollection<TSharePointMetadata>> GetItems<TSharePointMetadata>(string viewXml)
+        protected internal abstract Task<ICollection<TSharePointMetadata>> GetItemsAsync<TSharePointMetadata>(string viewXml)
             where TSharePointMetadata : ISharePointMetadata, new();
 
-        protected internal abstract Task<(int Id, List<string> CreatedFolders)> AddFile<TSharePointFile>(IReadOnlyDictionary<string, object> fields, 
+        protected internal abstract Task<(int Id, List<string> CreatedFolders)> AddFileAsync<TSharePointFile>(IReadOnlyDictionary<string, object> fields, 
             string fileName, string folderName, Stream content, bool isUpdateFile) where TSharePointFile : ISharePointFile, new();
 
-        protected internal abstract Task DeleteFile<TSharePointFile>(int id)
+        protected internal abstract Task DeleteFileAsync<TSharePointFile>(int id)
             where TSharePointFile : ISharePointFile, new();
 
-        protected internal abstract Task RemoveFolders<TSharePointFile>(List<string> folders)
+        protected internal abstract Task RemoveFoldersAsync<TSharePointFile>(List<string> folders)
             where TSharePointFile : ISharePointFile, new();
 
-        public abstract Task<SharePointDocumentInfo> GetFiles(string documentLibraryName, string fileRef);
+        public SharePointDocumentInfo GetFiles(string documentLibraryName, string fileRef)
+        {
+            return GetFilesAsync(documentLibraryName, fileRef).GetAwaiter().GetResult();
+        }
 
-        public async Task<TSharePointFile> GetFileById<TSharePointFile>(int id)
+        public abstract Task<SharePointDocumentInfo> GetFilesAsync(string documentLibraryName, string fileRef);
+
+        public TSharePointFile GetFileById<TSharePointFile>(int id)
             where TSharePointFile : ISharePointFile, new()
         {
-            var files = await GetItems<TSharePointFile>(string.Format(SharePointQueries.QueryItemById, id));
+            return GetFileByIdAsync<TSharePointFile>(id).GetAwaiter().GetResult();
+        }
+
+        public async Task<TSharePointFile> GetFileByIdAsync<TSharePointFile>(int id)
+            where TSharePointFile : ISharePointFile, new()
+        {
+            var files = await GetItemsAsync<TSharePointFile>(string.Format(SharePointQueries.QueryItemById, id));
             return files.FirstOrDefault();
         }
 
-        public async Task<TSharePointItem> GetItemById<TSharePointItem>(int id)
+        public TSharePointItem GetItemById<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new()
         {
-            var items = await GetItems<TSharePointItem>(string.Format(SharePointQueries.QueryItemById, id));
+            return GetItemByIdAsync<TSharePointItem>(id).GetAwaiter().GetResult();
+        }
+
+        public async Task<TSharePointItem> GetItemByIdAsync<TSharePointItem>(int id)
+            where TSharePointItem : ISharePointItem, new()
+        {
+            var items = await GetItemsAsync<TSharePointItem>(string.Format(SharePointQueries.QueryItemById, id));
             return items.FirstOrDefault();
         }
 
@@ -147,7 +169,12 @@ namespace Polimorfismo.SharePoint.Transaction
             EnqueueCommand<SharePointDeleteFileCommand<TSharePointFile>, TSharePointFile>(sharePointFile);
         }
 
-        public async Task SaveChanges()
+        public void SaveChanges()
+        {
+            SaveChangesAsync().GetAwaiter().GetResult();
+        }
+
+        public async Task SaveChangesAsync()
         {
             var undoStack = new Stack<ISharePointCommand>();
 
@@ -165,7 +192,7 @@ namespace Polimorfismo.SharePoint.Transaction
                 {
                     var command = _commandQueue.First();
 
-                    await command.Execute();
+                    await command.ExecuteAsync();
 
                     undoStack.Push(command);
 
@@ -174,7 +201,7 @@ namespace Polimorfismo.SharePoint.Transaction
             }
             catch (Exception ex)
             {
-                await Rollback(undoStack);
+                await RollbackAsync(undoStack);
 
                 throw new SharePointException(SharePointErrorCode.SaveChanges, ex.Message, ex);
             }
@@ -186,11 +213,11 @@ namespace Polimorfismo.SharePoint.Transaction
             }
         }
 
-        private async Task Rollback(Stack<ISharePointCommand> undoStack)
+        private async Task RollbackAsync(Stack<ISharePointCommand> undoStack)
         {
             while (undoStack.Count > 0)
             {
-                await undoStack.Pop().Undo();
+                await undoStack.Pop().UndoAsync();
             }
         }
 
@@ -225,7 +252,7 @@ namespace Polimorfismo.SharePoint.Transaction
 
             _sharePointBackgroundTasks.Action(() =>
             {
-                command.Prepare().GetAwaiter().GetResult();
+                command.PrepareAsync().GetAwaiter().GetResult();
                 _sharePointBackgroundTasks.Token.ThrowIfCancellationRequested();
             });
         }

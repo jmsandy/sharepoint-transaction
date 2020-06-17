@@ -108,6 +108,7 @@
     <Compile Include="SharePointAggregatingListItem.cs" />
     <Compile Include="SharePointBackgroundTasksUnitTest.cs" />
     <Compile Include="SharePointDocumentInfoUnitTest.cs" />
+    <Compile Include="SharePointExtensionsUnitTest.cs" />
     <Compile Include="SharePointFile.cs" />
     <Compile Include="SharePointFileUnitTest.cs" />
     <Compile Include="SharePointListItem.cs" />

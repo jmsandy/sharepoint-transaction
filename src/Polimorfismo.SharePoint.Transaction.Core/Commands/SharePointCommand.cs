@@ -50,11 +50,11 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         #region ISharePointCommand - Members
 
-        public abstract Task Prepare();
+        public abstract Task PrepareAsync();
 
-        public abstract Task Execute();
+        public abstract Task ExecuteAsync();
 
-        public abstract Task Undo();
+        public abstract Task UndoAsync();
 
         #endregion
 

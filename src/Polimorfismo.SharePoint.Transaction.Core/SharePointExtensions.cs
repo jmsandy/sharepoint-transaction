@@ -42,14 +42,14 @@ namespace Polimorfismo.SharePoint.Transaction
             return SharePointReflectionUtils.GetSharePointUsersDictionary(item);
         }
 
-        public static async Task ConfigureUserFields(this SharePointItemTracking itemTracking, SharePointClientBase sharePointClient)
+        public static async Task ConfigureUserFieldsAsync(this SharePointItemTracking itemTracking, SharePointClientBase sharePointClient)
         {
             foreach (var userField in itemTracking.Item.GetUserFields())
             {
                 if (!string.IsNullOrWhiteSpace(userField.Value as string))
                 {
                     itemTracking.Fields[userField.Key] =
-                        (await sharePointClient.GetUserByLogin(userField.Value as string)).Id;
+                        (await sharePointClient.GetUserByLoginAsync(userField.Value as string)).Id;
                 }
             }
         }
@@ -57,16 +57,24 @@ namespace Polimorfismo.SharePoint.Transaction
         public static IReadOnlyDictionary<string, object> ConfigureReferences(this SharePointItemTracking itemTracking, 
             SharePointListItemTracking listTracking, bool isOriginalFields = false)
         {
+            var references = (isOriginalFields ? itemTracking.OriginalItem : itemTracking.Item).GetReferences();
             var fields = isOriginalFields ? itemTracking.OriginalFields.ToDictionary() : itemTracking.Fields.ToDictionary();
 
-            foreach (var reference in itemTracking.Item.GetReferences())
+            foreach (var reference in references)
             {
                 if (fields.ContainsKey(reference.Key))
                 {
-                    var value = listTracking.Get(reference.Value as ISharePointItem);
+                    var value = listTracking.Get(reference.Value as ISharePointItem, isOriginalFields);
                     if (value != null)
                     {
-                        itemTracking.Fields[reference.Key] = value.Id;
+                        if (isOriginalFields)
+                        {
+                            itemTracking.OriginalFields[reference.Key] = value.OriginalItem.Id;
+                        }
+                        else
+                        {
+                            itemTracking.Fields[reference.Key] = value.Id;
+                        }
                     }
                 }
             }

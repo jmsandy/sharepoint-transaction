@@ -40,28 +40,28 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         #region ISharePointCommand - Members
 
-        public override async Task Prepare()
+        public override async Task PrepareAsync()
         {
-            await SharePointItemTracking.ConfigureUserFields(SharePointClient);
+            await SharePointItemTracking.ConfigureUserFieldsAsync(SharePointClient);
 
-            var item = await SharePointClient.GetFileById<TSharePointFile>(SharePointItemTracking.Id);
+            var item = await SharePointClient.GetFileByIdAsync<TSharePointFile>(SharePointItemTracking.Id);
             SharePointItemTracking.LoadOriginalItem(item);
         }
 
-        public override async Task Execute()
+        public override async Task ExecuteAsync()
         {
             var sharePointFile = (ISharePointFile)SharePointItemTracking.Item;
 
-            await SharePointClient.AddFile<TSharePointFile>(
+            await SharePointClient.AddFileAsync<TSharePointFile>(
                 SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking),
                 sharePointFile.FileName, sharePointFile.Folder, sharePointFile.InputStream, true);
         }
 
-        public override async Task Undo()
+        public override async Task UndoAsync()
         {
             var sharePointFile = (ISharePointFile)SharePointItemTracking.OriginalItem;
 
-            await SharePointClient.AddFile<TSharePointFile>(
+            await SharePointClient.AddFileAsync<TSharePointFile>(
                 SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking, true),
                 sharePointFile.FileName, sharePointFile.Folder, sharePointFile.InputStream, true);
         }

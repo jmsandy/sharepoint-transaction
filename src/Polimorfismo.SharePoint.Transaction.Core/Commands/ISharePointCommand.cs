@@ -30,10 +30,10 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         SharePointItemTracking SharePointItemTracking { get; }
 
-        Task Prepare();
+        Task PrepareAsync();
 
-        Task Execute();
+        Task ExecuteAsync();
 
-        Task Undo();
+        Task UndoAsync();
     }
 }

@@ -29,7 +29,7 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
         [Fact]
         public async Task SharePoint_GetFileById_Success_Test()
         {
-            var file = await _sharePointClient.GetFileById<SharePointFile>(6);
+            var file = await _sharePointClient.GetFileByIdAsync<SharePointFile>(6);
             using (var fs = new FileStream(file.FileName, FileMode.CreateNew))
             {
                 await file.InputStream.CopyToAsync(fs);
@@ -50,7 +50,7 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
 
             _sharePointClient.AddFile(file);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
 
             _sharePointClient.AddFile(file);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
         }
 
         [Fact]
@@ -82,16 +82,16 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
 
             _sharePointClient.AddFile(file);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
             file.Description = "Description updated";
             file.InputStream = File.OpenRead("SharePointFileUpdated.txt");
 
             _sharePointClient.UpdateFile(file);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
-            var remoteFile = await _sharePointClient.GetFileById<SharePointFile>(file.Id);
+            var remoteFile = await _sharePointClient.GetFileByIdAsync<SharePointFile>(file.Id);
 
             var remoteContentFile = new StreamReader(remoteFile.InputStream).ReadToEnd();
             var expectedContentFile = new StreamReader(File.OpenRead("SharePointFileUpdated.txt")).ReadToEnd();
@@ -113,11 +113,11 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
 
             _sharePointClient.AddFile(file);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
             _sharePointClient.DeleteFile(file);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
         }
     }
 }

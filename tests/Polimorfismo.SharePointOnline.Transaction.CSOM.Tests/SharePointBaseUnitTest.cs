@@ -28,6 +28,8 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
     {
         #region Constants
 
+        protected const int UserId = 0;
+
         protected const string UserPwd = "";
 
         protected const string Username = "";

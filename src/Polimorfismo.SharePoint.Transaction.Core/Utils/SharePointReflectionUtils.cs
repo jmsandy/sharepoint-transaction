@@ -32,11 +32,14 @@ namespace Polimorfismo.SharePoint.Transaction.Utils
         {
             var dictionary = new Dictionary<string, object>();
 
-            foreach (var property in item.GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any(a => !a.IsIgnoreToInsertOrUpdate)).ToList())
+            if (item != null)
             {
-                dictionary.Add(property.GetCustomAttributes<SharePointFieldAttribute>().First().Name, property.GetValue(item));
+                foreach (var property in item.GetType()
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any(a => !a.IsIgnoreToInsertOrUpdate)).ToList())
+                {
+                    dictionary.Add(property.GetCustomAttributes<SharePointFieldAttribute>().First().Name, property.GetValue(item));
+                }
             }
 
             return dictionary;
@@ -47,11 +50,14 @@ namespace Polimorfismo.SharePoint.Transaction.Utils
         {
             var dictionary = new Dictionary<string, object>();
 
-            foreach (var property in item.GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any(a => a.IsReference)).ToList())
+            if (item != null)
             {
-                dictionary.Add(property.GetCustomAttributes<SharePointFieldAttribute>().First().Name, property.GetValue(item));
+                foreach (var property in item.GetType()
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any(a => a.IsReference)).ToList())
+                {
+                    dictionary.Add(property.GetCustomAttributes<SharePointFieldAttribute>().First().Name, property.GetValue(item));
+                }
             }
 
             return dictionary;
@@ -62,11 +68,14 @@ namespace Polimorfismo.SharePoint.Transaction.Utils
         {
             var dictionary = new Dictionary<string, object>();
 
-            foreach (var property in item.GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any(a => a.IsUserValue)).ToList())
+            if (item != null)
             {
-                dictionary.Add(property.GetCustomAttributes<SharePointFieldAttribute>().First().Name, property.GetValue(item));
+                foreach (var property in item.GetType()
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.GetCustomAttributes<SharePointFieldAttribute>().Any(a => a.IsUserValue)).ToList())
+                {
+                    dictionary.Add(property.GetCustomAttributes<SharePointFieldAttribute>().First().Name, property.GetValue(item));
+                }
             }
 
             return dictionary;

@@ -49,9 +49,9 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
 
             _sharePointClient.AddItem(item);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
-            var expectedItem = await _sharePointClient.GetItemById<SharePointListItem>(item.Id);
+            var expectedItem = await _sharePointClient.GetItemByIdAsync<SharePointListItem>(item.Id);
 
             Assert.NotNull(expectedItem);
             item.Id.ShouldEqual(expectedItem.Id);
@@ -78,9 +78,9 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
 
             _sharePointClient.AddItem(item);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
-            var items = await _sharePointClient.GetItems<SharePointListItem>(
+            var items = await _sharePointClient.GetItemsAsync<SharePointListItem>(
                 Camlex.Query().Where(i => (string)i[SharePointConstants.FieldNameTitle] == item.TitleField).ToCamlQuery());
 
             item.TitleField.ShouldEqual(items.Single().TitleField);
@@ -95,17 +95,17 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             };
 
             _sharePointClient.AddItem(item);
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
-            var updatedItem = await _sharePointClient.GetItemById<SharePointListItem>(item.Id);
+            var updatedItem = await _sharePointClient.GetItemByIdAsync<SharePointListItem>(item.Id);
 
             var updatedTitle = $"Updated - {item.TitleField}";
             updatedItem.TitleField = updatedTitle;
 
             _sharePointClient.UpdateItem(updatedItem);
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
-            var expectedItem = await _sharePointClient.GetItemById<SharePointListItem>(updatedItem.Id);
+            var expectedItem = await _sharePointClient.GetItemByIdAsync<SharePointListItem>(updatedItem.Id);
             updatedItem.TitleField = updatedTitle;
 
             updatedTitle.ShouldEqual(expectedItem.TitleField);
@@ -120,14 +120,14 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             };
 
             _sharePointClient.AddItem(item);
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
-            var deletedItem = await _sharePointClient.GetItemById<SharePointListItem>(item.Id);
+            var deletedItem = await _sharePointClient.GetItemByIdAsync<SharePointListItem>(item.Id);
 
             _sharePointClient.DeleteItem(deletedItem);
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
-            var expectedItem = await _sharePointClient.GetItemById<SharePointListItem>(item.Id);
+            var expectedItem = await _sharePointClient.GetItemByIdAsync<SharePointListItem>(item.Id);
 
             Assert.Null(expectedItem);
         }
@@ -148,9 +148,9 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             _sharePointClient.AddItem(listItem);
             _sharePointClient.AddItem(aggregatingListItem);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
-            var expectedListItem = await _sharePointClient.GetItemById<SharePointListItem>(listItem.Id);
+            var expectedListItem = await _sharePointClient.GetItemByIdAsync<SharePointListItem>(listItem.Id);
 
             expectedListItem.TitleField.ShouldEqual(listItem.TitleField);
             expectedListItem.LookupFieldId.ShouldEqual(aggregatingListItem.Id);
@@ -166,7 +166,7 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
 
             _sharePointClient.AddItem(aggregatingListItem);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
             var listItem = new SharePointListItem
             {
@@ -182,9 +182,9 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             _sharePointClient.AddItem(listItem);
             _sharePointClient.AddItem(listItem2);
 
-            await _sharePointClient.SaveChanges();
+            await _sharePointClient.SaveChangesAsync();
 
-            var items = await _sharePointClient.GetItems<SharePointListItem>(
+            var items = await _sharePointClient.GetItemsAsync<SharePointListItem>(
                 Camlex.Query().Where(i => i["LookupField"] == (DataTypes.LookupId)aggregatingListItem.Id.ToString()).ToCamlQuery());
 
             items.Count.ShouldEqual(2);

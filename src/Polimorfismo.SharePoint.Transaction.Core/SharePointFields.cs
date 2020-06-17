@@ -53,7 +53,7 @@ namespace Polimorfismo.SharePoint.Transaction
 
             if (!_fields.ContainsKey(SharePointConstants.FieldNameId))
             {
-                _fields.Add(SharePointConstants.FieldNameId, item.Id);
+                _fields.Add(SharePointConstants.FieldNameId, item?.Id);
             }
         }
 

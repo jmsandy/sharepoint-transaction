@@ -46,13 +46,13 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         #region ISharePointCommand - Members
 
-        public override async Task Prepare() => await SharePointItemTracking.ConfigureUserFields(SharePointClient);
+        public override async Task PrepareAsync() => await SharePointItemTracking.ConfigureUserFieldsAsync(SharePointClient);
 
-        public override async Task Execute()
+        public override async Task ExecuteAsync()
         {
             var sharePointFile = (ISharePointFile)SharePointItemTracking.Item;
 
-            var fileInfo = await SharePointClient.AddFile<TSharePointFile>(
+            var fileInfo = await SharePointClient.AddFileAsync<TSharePointFile>(
                 SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking), 
                 sharePointFile.FileName, sharePointFile.Folder, sharePointFile.InputStream, false);
 
@@ -60,10 +60,10 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
             _createdFolders = fileInfo.CreatedFolders;
         }
 
-        public override async Task Undo()
+        public override async Task UndoAsync()
         {   
-            await SharePointClient.DeleteFile<TSharePointFile>(SharePointItemTracking.Id);
-            await SharePointClient.RemoveFolders<TSharePointFile>(_createdFolders);
+            await SharePointClient.DeleteFileAsync<TSharePointFile>(SharePointItemTracking.Id);
+            await SharePointClient.RemoveFoldersAsync<TSharePointFile>(_createdFolders);
 
             SharePointItemTracking.Id = 0;
         }

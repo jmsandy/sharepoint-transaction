@@ -56,8 +56,8 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public void Add(SharePointItemTracking item) => _items.Add(item);
 
-        public SharePointItemTracking Get(ISharePointItem item)
-            => _items.FirstOrDefault(i => ReferenceEquals(i.Item, item));
+        public SharePointItemTracking Get(ISharePointItem item, bool isOriginalFields = false)
+            => _items.FirstOrDefault(i => ReferenceEquals(isOriginalFields ? i.OriginalItem : i.Item, item));
 
         #endregion
 

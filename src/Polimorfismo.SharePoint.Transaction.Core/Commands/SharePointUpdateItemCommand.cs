@@ -40,22 +40,22 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         #region ISharePointCommand - Members
 
-        public override async Task Prepare()
+        public override async Task PrepareAsync()
         {
-            await SharePointItemTracking.ConfigureUserFields(SharePointClient);
+            await SharePointItemTracking.ConfigureUserFieldsAsync(SharePointClient);
 
-            var item = await SharePointClient.GetItemById<TSharePointItem>(SharePointItemTracking.Id);
+            var item = await SharePointClient.GetItemByIdAsync<TSharePointItem>(SharePointItemTracking.Id);
             SharePointItemTracking.LoadOriginalItem(item);
         }
 
-        public override async Task Execute()
+        public override async Task ExecuteAsync()
         {
-            await SharePointClient.UpdateItem<TSharePointItem>(SharePointItemTracking.Id, SharePointItemTracking.Fields.ToDictionary());
+            await SharePointClient.UpdateItemAsync<TSharePointItem>(SharePointItemTracking.Id, SharePointItemTracking.Fields.ToDictionary());
         }
 
-        public override async Task Undo()
+        public override async Task UndoAsync()
         {
-            await SharePointClient.UpdateItem<TSharePointItem>(SharePointItemTracking.Id, SharePointItemTracking.OriginalFields.ToDictionary());
+            await SharePointClient.UpdateItemAsync<TSharePointItem>(SharePointItemTracking.Id, SharePointItemTracking.OriginalFields.ToDictionary());
         }
 
         #endregion
