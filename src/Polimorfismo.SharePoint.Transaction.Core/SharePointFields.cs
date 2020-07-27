@@ -47,9 +47,9 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Constructors / Finalizers
 
-        public SharePointFields(ISharePointMetadata item)
+        public SharePointFields(ISharePointMetadata item, Dictionary<string, object> fields = null)
         {
-            _fields = item.ToDictionary() ?? new Dictionary<string, object>();
+            _fields = fields ?? (item.ToDictionary() ?? new Dictionary<string, object>());
 
             if (!_fields.ContainsKey(SharePointConstants.FieldNameId))
             {

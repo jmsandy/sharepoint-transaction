@@ -22,7 +22,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class SharePointMessages {
+    internal class SharePointMessages {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Polimorfismo.SharePoint.Transaction.Resources.SharePointMessages", typeof(SharePointMessages).Assembly);
@@ -51,7 +51,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         /// <summary>
         ///   Looks up a localized string similar to It was not possible to prepare the commands to save the data present in the execution context..
         /// </summary>
-        public static string ERR400 {
+        internal static string ERR400 {
             get {
                 return ResourceManager.GetString("ERR400", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Document {0} not found..
         /// </summary>
-        public static string ERR401 {
+        internal static string ERR401 {
             get {
                 return ResourceManager.GetString("ERR401", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Only folders can receive others documents..
         /// </summary>
-        public static string ERR402 {
+        internal static string ERR402 {
             get {
                 return ResourceManager.GetString("ERR402", resourceCulture);
             }

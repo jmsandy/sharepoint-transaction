@@ -42,8 +42,8 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         public override async Task PrepareAsync()
         {
-            var item = await SharePointClient.GetItemByIdAsync<TSharePointItem>(SharePointItemTracking.Id);
-            SharePointItemTracking.LoadOriginalItem(item);
+            var item = await SharePointClient.GetAllFieldsByIdAsync<TSharePointItem>(SharePointItemTracking.Id);
+            SharePointItemTracking.LoadOriginalItem(item.Key, item.Value);
         }
 
         public override async Task ExecuteAsync()

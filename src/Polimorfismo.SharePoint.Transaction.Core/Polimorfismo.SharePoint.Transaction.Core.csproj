@@ -33,11 +33,11 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Resources\SharePointMessages.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
+      <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SharePointMessages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\SharePointQueries.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
+      <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SharePointQueries.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>

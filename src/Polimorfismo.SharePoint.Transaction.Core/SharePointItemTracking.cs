@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
 using Polimorfismo.SharePoint.Transaction.Utils;
 
 namespace Polimorfismo.SharePoint.Transaction
@@ -55,11 +56,11 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Methods
 
-        public void LoadOriginalItem(ISharePointMetadata originalItem)
+        public void LoadOriginalItem(ISharePointMetadata originalItem, Dictionary<string, object> fields = null)
         {
             IsOriginalItemLoaded = true;
             OriginalItem = originalItem;
-            OriginalFields = new SharePointFields(originalItem);
+            OriginalFields = new SharePointFields(originalItem, fields);
         }
 
         #endregion

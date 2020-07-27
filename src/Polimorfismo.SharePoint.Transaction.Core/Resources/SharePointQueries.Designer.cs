@@ -22,7 +22,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class SharePointQueries {
+    internal class SharePointQueries {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Polimorfismo.SharePoint.Transaction.Resources.SharePointQueries", typeof(SharePointQueries).Assembly);
@@ -51,7 +51,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;View Scope=&apos;RecursiveAll&apos;&gt;&lt;Query&gt;&lt;/Query&gt;&lt;/View&gt;.
         /// </summary>
-        public static string QueryAllFoldersFiles {
+        internal static string QueryAllFoldersFiles {
             get {
                 return ResourceManager.GetString("QueryAllFoldersFiles", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;View&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name=&apos;FileRef&apos; /&gt;&lt;Value Type=&apos;Text&apos;&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;.
         /// </summary>
-        public static string QueryDocumentType {
+        internal static string QueryDocumentType {
             get {
                 return ResourceManager.GetString("QueryDocumentType", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace Polimorfismo.SharePoint.Transaction.Resources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;View Scope=&quot;RecursiveAll&quot;&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name=&apos;ID&apos; /&gt;&lt;Value Type=&apos;Counter&apos;&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;.
         /// </summary>
-        public static string QueryItemById {
+        internal static string QueryItemById {
             get {
                 return ResourceManager.GetString("QueryItemById", resourceCulture);
             }

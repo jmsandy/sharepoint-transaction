@@ -22,6 +22,7 @@ using Polimorfismo.SharePoint.Transaction.Utils;
 using Polimorfismo.SharePoint.Transaction.Commands;
 using Polimorfismo.SharePoint.Transaction.Resources;
 
+[assembly: InternalsVisibleTo("Polimorfismo.SharePointOnline.Transaction.CSOM")]
 [assembly: InternalsVisibleTo("Polimorfismo.SharePointOnline.Transaction.CSOM.Tests")]
 
 namespace Polimorfismo.SharePoint.Transaction
@@ -88,6 +89,9 @@ namespace Polimorfismo.SharePoint.Transaction
         protected TSharePointMetadata CreateSharePointItem<TSharePointMetadata>()
              where TSharePointMetadata : ISharePointMetadata, new() => SharePointItemFactory.Create<TSharePointMetadata>();
 
+        protected internal abstract Task<KeyValuePair<ISharePointMetadata, Dictionary<string, object>>> GetAllFieldsByIdAsync<TSharePointMetadata>(int id)
+            where TSharePointMetadata : ISharePointMetadata, new();
+
         protected internal abstract Task<ICollection<TSharePointMetadata>> GetItemsAsync<TSharePointMetadata>(string viewXml)
             where TSharePointMetadata : ISharePointMetadata, new();
 
@@ -132,7 +136,7 @@ namespace Polimorfismo.SharePoint.Transaction
             var items = await GetItemsAsync<TSharePointItem>(string.Format(SharePointQueries.QueryItemById, id));
             return items.FirstOrDefault();
         }
-
+        
         public void AddItem<TSharePointItem>(TSharePointItem sharePointItem)
             where TSharePointItem : ISharePointItem, new()
         {

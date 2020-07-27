@@ -44,8 +44,8 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
         {
             await SharePointItemTracking.ConfigureUserFieldsAsync(SharePointClient);
 
-            var item = await SharePointClient.GetItemByIdAsync<TSharePointItem>(SharePointItemTracking.Id);
-            SharePointItemTracking.LoadOriginalItem(item);
+            var item = await SharePointClient.GetAllFieldsByIdAsync<TSharePointItem>(SharePointItemTracking.Id);
+            SharePointItemTracking.LoadOriginalItem(item.Key, item.Value);
         }
 
         public override async Task ExecuteAsync()

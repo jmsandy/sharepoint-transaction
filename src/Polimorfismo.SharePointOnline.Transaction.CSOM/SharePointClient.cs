@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using Microsoft.SharePoint.Client;
 using Polimorfismo.SharePoint.Transaction;
 using Polimorfismo.SharePoint.Transaction.Utils;
+using Polimorfismo.SharePoint.Transaction.Resources;
 
 namespace Polimorfismo.Microsoft.SharePoint.Transaction
 {
@@ -97,7 +98,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return sharePointUser;
         }
 
-        protected override async Task<int> AddItemAsync<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
+        protected override internal async Task<int> AddItemAsync<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
         {
             var itemCreateInfo = new ListItemCreationInformation();
             var listItem = ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).AddItem(itemCreateInfo);
@@ -105,17 +106,52 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return await Update(listItem, fields);
         }
 
-        protected override async Task UpdateItemAsync<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
+        protected override internal async Task UpdateItemAsync<TSharePointItem>(int id, IReadOnlyDictionary<string, object> fields)
         {
             await Update(ClientContext.GetList(CreateSharePointItem<TSharePointItem>().ListName).GetItemById(id), fields);
         }
 
-        protected override async Task DeleteItemAsync<TSharePointItem>(int id)
+        protected override internal async Task DeleteItemAsync<TSharePointItem>(int id)
         {
             await Delete<TSharePointItem>(id);
         }
 
-        protected override async Task<ICollection<TSharePointMetadata>> GetItemsAsync<TSharePointMetadata>(string viewXml)
+        protected override internal async Task<KeyValuePair<ISharePointMetadata, Dictionary<string, object>>> GetAllFieldsByIdAsync<TSharePointMetadata>(int id)
+        {
+            TSharePointMetadata item = default;
+            var fields = new Dictionary<string, object>();
+
+            using (var clientContext = new ClientContext(_webFullUrl))
+            {
+                clientContext.Credentials = _networkCredential;
+
+                var listName = CreateSharePointItem<TSharePointMetadata>().ListName;
+                var listWithContent = clientContext.GetList(listName);
+
+                var listItemCollection = listWithContent.GetItems(new CamlQuery()
+                {
+                    ViewXml = string.Format(SharePointQueries.QueryItemById, id)
+                });
+                clientContext.Load(listItemCollection);
+                await clientContext.ExecuteQueryAsync();
+
+                if (listItemCollection != null)
+                {
+                    var items = listItemCollection.ToKnowType<TSharePointMetadata>(clientContext);
+                    var listItem = listItemCollection?.FirstOrDefault();
+
+                    item = items.FirstOrDefault();
+                    listItem?.FieldValues.Keys.ToList().ForEach(key =>
+                    {
+                        fields.Add(key, listItem[key]);
+                    });
+                }
+            }
+
+            return new KeyValuePair<ISharePointMetadata, Dictionary<string, object>>(item, fields);
+        }
+
+        protected override internal async Task<ICollection<TSharePointMetadata>> GetItemsAsync<TSharePointMetadata>(string viewXml)
         {
             CamlQuery camlQuery = null;
             if (!string.IsNullOrWhiteSpace(viewXml))
@@ -126,7 +162,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return await GetItemsByCamlQuery<TSharePointMetadata>(camlQuery);
         }
 
-        protected override async Task<(int Id, List<string> CreatedFolders)> AddFileAsync<TSharePointFile>(IReadOnlyDictionary<string, object> fields,
+        protected override internal async Task<(int Id, List<string> CreatedFolders)> AddFileAsync<TSharePointFile>(IReadOnlyDictionary<string, object> fields,
             string fileName, string folderName, Stream content, bool isUpdateFile)
         {
             var fileCreateInfo = new FileCreationInformation
@@ -169,12 +205,12 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             return (id, createdFolders);
         }
 
-        protected override async Task DeleteFileAsync<TSharePointFile>(int id)
+        protected override internal async Task DeleteFileAsync<TSharePointFile>(int id)
         {
             await Delete<TSharePointFile>(id);
         }
 
-        protected override async Task RemoveFoldersAsync<TSharePointFile>(List<string> folders)
+        protected override internal async Task RemoveFoldersAsync<TSharePointFile>(List<string> folders)
         {
             if (folders?.Count == 0) return;
 
