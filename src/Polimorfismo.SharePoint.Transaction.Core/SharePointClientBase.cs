@@ -15,6 +15,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -22,6 +23,7 @@ using Polimorfismo.SharePoint.Transaction.Utils;
 using Polimorfismo.SharePoint.Transaction.Commands;
 using Polimorfismo.SharePoint.Transaction.Resources;
 
+[assembly: InternalsVisibleTo("Polimorfismo.SharePoint.Transaction.Core.Tests")]
 [assembly: InternalsVisibleTo("Polimorfismo.SharePointOnline.Transaction.CSOM")]
 [assembly: InternalsVisibleTo("Polimorfismo.SharePointOnline.Transaction.CSOM.Tests")]
 
@@ -45,15 +47,107 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Properties
 
+        protected bool Disposed { get; private set; }
+
         internal readonly SharePointListItemTracking Tracking = new SharePointListItemTracking();
 
         protected readonly IReadOnlyList<string> IgnorePropertiesInsertOrUpdate = new List<string>
         {
             SharePointConstants.FieldNameId,
+            SharePointConstants.FieldNameBSN,
+            SharePointConstants.FieldNameGUID,
+            SharePointConstants.FieldNameDirty,
+            SharePointConstants.FieldNameOrder,
+            SharePointConstants.FieldNameLevel,
+            SharePointConstants.FieldNameProgId,
             SharePointConstants.FieldNameFileRef,
             SharePointConstants.FieldNameCreated,
+            SharePointConstants.FieldNameScopeId,
             SharePointConstants.FieldNameModified,
-            SharePointConstants.FieldNameUIVersionString
+            SharePointConstants.FieldNameFileType,
+            SharePointConstants.FieldNameMetaInfo,
+            SharePointConstants.FieldNameFileSize,
+            SharePointConstants.FieldNameXdProgID,
+            SharePointConstants.FieldNameParsable,
+            SharePointConstants.FieldNameStubFile,
+            SharePointConstants.FieldNameUniqueId,
+            SharePointConstants.FieldNameSourceUrl,
+            SharePointConstants.FieldNameLikeCount,
+            SharePointConstants.FieldNameIpLabelId,
+            SharePointConstants.FieldNameNoExecute,
+            SharePointConstants.FieldNameFSObjType,
+            SharePointConstants.FieldNameAppAuthor,
+            SharePointConstants.FieldNameAppEditor,
+            SharePointConstants.FieldNameVirusInfo,
+            SharePointConstants.FieldNameUIVersion,
+            SharePointConstants.FieldNameStreamHash,
+            SharePointConstants.FieldNameRestricted,
+            SharePointConstants.FieldNameInstanceID,
+            SharePointConstants.FieldNameCopySource,
+            SharePointConstants.FieldNameFileDirRef,
+            SharePointConstants.FieldNameTemplateUrl,
+            SharePointConstants.FieldNameXdSignature,
+            SharePointConstants.FieldNameAttachments,
+            SharePointConstants.FieldNameSMTotalSize,
+            SharePointConstants.FieldNameVirusStatus,
+            SharePointConstants.FieldNameCreatedDate,
+            SharePointConstants.FieldNameFileLeafRef,
+            SharePointConstants.FieldNameShortcutUrl,
+            SharePointConstants.FieldNameDisplayName,
+            SharePointConstants.FieldNameLastModified,
+            SharePointConstants.FieldNameOriginatorId,
+            SharePointConstants.FieldNameSyncClientId,
+            SharePointConstants.FieldNameSortBehavior,
+            SharePointConstants.FieldNameAccessPolicy,
+            SharePointConstants.FieldNameHTMLFileType,
+            SharePointConstants.FieldNameCommentFlags,
+            SharePointConstants.FieldNameCommentCount,
+            SharePointConstants.FieldNameVirusStatus2,
+            SharePointConstants.FieldNameCheckoutUser,
+            SharePointConstants.FieldNameRmsTemplateId,
+            SharePointConstants.FieldNameShortcutWebId,
+            SharePointConstants.FieldNameVirusVendorID,
+            SharePointConstants.FieldNameContentTypeId,
+            SharePointConstants.FieldNameComplianceTag,
+            SharePointConstants.FieldNameA2ODMountCount,
+            SharePointConstants.FieldNameParentLeafName,
+            SharePointConstants.FieldNameParentUniqueId,
+            SharePointConstants.FieldNameShortcutSiteId,
+            SharePointConstants.FieldNameCheckinComment,
+            SharePointConstants.FieldNameContentVersion,
+            SharePointConstants.FieldNameItemChildCount,
+            SharePointConstants.FieldNameUIVersionString,
+            SharePointConstants.FieldNameWorkflowVersion,
+            SharePointConstants.FieldNameComplianceFlags,
+            SharePointConstants.FieldNameCheckedOutTitle,
+            SharePointConstants.FieldNameMediaServiceOCR,
+            SharePointConstants.FieldNameSharedFileIndex,
+            SharePointConstants.FieldNameCheckedOutUserId,
+            SharePointConstants.FieldNameShortcutUniqueId,
+            SharePointConstants.FieldNameSMTotalFileCount,
+            SharePointConstants.FieldNameFolderChildCount,
+            SharePointConstants.FieldNameOwshiddenversion,
+            SharePointConstants.FieldNameIsCurrentVersion,
+            SharePointConstants.FieldNameModerationStatus,
+            SharePointConstants.FieldNameListSchemaVersion,
+            SharePointConstants.FieldNameComplianceAssetId,
+            SharePointConstants.FieldNameSMLastModifiedDate,
+            SharePointConstants.FieldNameWorkflowInstanceID,
+            SharePointConstants.FieldNameModerationComments,
+            SharePointConstants.FieldNameHasCopyDestinations,
+            SharePointConstants.FieldNameComplianceTagUserId,
+            SharePointConstants.FieldNameIsCheckedoutToLocal,
+            SharePointConstants.FieldNameParentVersionString,
+            SharePointConstants.FieldNameHasEncryptedContent,
+            SharePointConstants.FieldNameDocConcurrencyNumber,
+            SharePointConstants.FieldNameMediaServiceAutoTags,
+            SharePointConstants.FieldNameMediaServiceMetadata,
+            SharePointConstants.FieldNameSMTotalFileStreamSize,
+            SharePointConstants.FieldNameIpLabelAssignmentMethod,
+            SharePointConstants.FieldNameComplianceTagWrittenTime,
+            SharePointConstants.FieldNameMediaServiceFastMetadata,
+            SharePointConstants.FieldNameMediaServiceEventHashCode,
+            SharePointConstants.FieldNameMediaServiceGenerationTime
         };
 
         #endregion
@@ -69,11 +163,7 @@ namespace Polimorfismo.SharePoint.Transaction
         #endregion
 
         #region Methods
-
-        public SharePointUser GetUserByLogin(string login)
-        {
-            return GetUserByLoginAsync(login).GetAwaiter().GetResult();
-        }
+        public abstract SharePointUser GetUserByLogin(string login);
 
         public abstract Task<SharePointUser> GetUserByLoginAsync(string login);
 
@@ -104,37 +194,38 @@ namespace Polimorfismo.SharePoint.Transaction
         protected internal abstract Task RemoveFoldersAsync<TSharePointFile>(List<string> folders)
             where TSharePointFile : ISharePointFile, new();
 
-        public SharePointDocumentInfo GetFiles(string documentLibraryName, string fileRef)
+        public SharePointDocumentInfo GetDocumentsInfo(string documentLibraryName, string fileRef)
         {
-            return GetFilesAsync(documentLibraryName, fileRef).GetAwaiter().GetResult();
+            return Task<Task<SharePointDocumentInfo>>.Factory.StartNew(() => GetDocumentsInfoAsync(documentLibraryName, fileRef),
+                CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
         }
 
-        public abstract Task<SharePointDocumentInfo> GetFilesAsync(string documentLibraryName, string fileRef);
+        public abstract Task<SharePointDocumentInfo> GetDocumentsInfoAsync(string documentLibraryName, string fileRef);
 
         public TSharePointFile GetFileById<TSharePointFile>(int id)
             where TSharePointFile : ISharePointFile, new()
         {
-            return GetFileByIdAsync<TSharePointFile>(id).GetAwaiter().GetResult();
+            return Task<Task<TSharePointFile>>.Factory.StartNew(() => GetFileByIdAsync<TSharePointFile>(id), 
+                CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
         }
 
         public async Task<TSharePointFile> GetFileByIdAsync<TSharePointFile>(int id)
             where TSharePointFile : ISharePointFile, new()
         {
-            var files = await GetItemsAsync<TSharePointFile>(string.Format(SharePointQueries.QueryItemById, id));
-            return files.FirstOrDefault();
+            return (await GetItemsAsync<TSharePointFile>(string.Format(SharePointQueries.QueryItemById, id))).FirstOrDefault();
         }
 
         public TSharePointItem GetItemById<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new()
         {
-            return GetItemByIdAsync<TSharePointItem>(id).GetAwaiter().GetResult();
+            return Task<Task<TSharePointItem>>.Factory.StartNew(() => GetItemByIdAsync<TSharePointItem>(id),
+                CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
         }
 
         public async Task<TSharePointItem> GetItemByIdAsync<TSharePointItem>(int id)
             where TSharePointItem : ISharePointItem, new()
         {
-            var items = await GetItemsAsync<TSharePointItem>(string.Format(SharePointQueries.QueryItemById, id));
-            return items.FirstOrDefault();
+            return (await GetItemsAsync<TSharePointItem>(string.Format(SharePointQueries.QueryItemById, id))).FirstOrDefault();
         }
         
         public void AddItem<TSharePointItem>(TSharePointItem sharePointItem)
@@ -175,7 +266,8 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public void SaveChanges()
         {
-            SaveChangesAsync().GetAwaiter().GetResult();
+            Task.Factory.StartNew(() => SaveChangesAsync(),
+                CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
         }
 
         public async Task SaveChangesAsync()
@@ -196,9 +288,11 @@ namespace Polimorfismo.SharePoint.Transaction
                 {
                     var command = _commandQueue.First();
 
+                    if (command.StackFirst) undoStack.Push(command);
+
                     await command.ExecuteAsync();
 
-                    undoStack.Push(command);
+                    if (!command.StackFirst) undoStack.Push(command);
 
                     _commandQueue.RemoveFirst();
                 }
@@ -256,7 +350,8 @@ namespace Polimorfismo.SharePoint.Transaction
 
             _sharePointBackgroundTasks.Action(() =>
             {
-                command.PrepareAsync().GetAwaiter().GetResult();
+                Task.Factory.StartNew(() => command.PrepareAsync(),
+                    CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
                 _sharePointBackgroundTasks.Token.ThrowIfCancellationRequested();
             });
         }
@@ -271,14 +366,18 @@ namespace Polimorfismo.SharePoint.Transaction
             GC.SuppressFinalize(this);
         }
 
-        public virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
+            if (Disposed) return;
+
             if (disposing)
             {
                 Tracking?.Dispose();
                 _commandQueue?.Clear();
                 _sharePointBackgroundTasks?.Dispose();
             }
+
+            Disposed = true;
         }
 
         #endregion

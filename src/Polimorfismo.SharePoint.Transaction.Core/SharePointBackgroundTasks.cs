@@ -25,9 +25,11 @@ namespace Polimorfismo.SharePoint.Transaction
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-05-25 11:27:26 PM</Date>
-    internal class SharePointBackgroundTasks : IDisposable
+    internal sealed class SharePointBackgroundTasks : IDisposable
     {
         #region Properties
+        
+        private bool Disposed { get; set; }
 
         internal CancellationToken Token => CancellationTokenSource.Token;
 
@@ -85,12 +87,16 @@ namespace Polimorfismo.SharePoint.Transaction
             GC.SuppressFinalize(this);
         }
 
-        public void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
+            if (Disposed) return;
+
             if (disposing)
             {
                 Cancel();
             }
+
+            Disposed = true;
         }
 
         #endregion

@@ -15,9 +15,10 @@
 using Xunit;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
+using FluentAssertions;
 using System.Collections.Generic;
 using Polimorfismo.SharePoint.Transaction;
+using Polimorfismo.SharePoint.Transaction.Commons.Tests;
 
 namespace Polimorfismo.SharePointOnline.Transaction.Tests
 {
@@ -26,11 +27,13 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-06-17 07:12:12 PM</Date>
-    public class SharePointExtensionsUnitTest : SharePointBaseUnitTest
+    public class SharePointExtensionsTests
     {
-        [Fact]
-        public void SharePoint_Extensions_Fields_Test()
+        [Trait("Category", "SharePointCore - Extensions")]
+        [Fact(DisplayName = "Converts SharePoint object to Dictionary with success")]
+        public void SharePointExtensions_ToDictionary_ConvertsObjectToDictionaryWithSuccess()
         {
+            // Arrange
             var item = new SharePointListItem
             {
                 IntegerField = 1,
@@ -41,8 +44,8 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
                 OptionField = "Option 2",
                 TextField = "Single Line",
                 TextArea = "Multiple Lines",
-                PersonOrGroupField = Username,
                 DateField = DateTime.Now.Date,
+                PersonOrGroupField = "Username",
                 LinkField = "https://www.microsoft.com",
                 ImageField = "https://www.microsoft.com"
             };
@@ -60,23 +63,27 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             expectedFieldsDictionary.Add("TextArea", "Multiple Lines");
             expectedFieldsDictionary.Add("Created", DateTime.MinValue);
             expectedFieldsDictionary.Add("Modified", DateTime.MinValue);
-            expectedFieldsDictionary.Add("PersonOrGroupField", Username);
+            expectedFieldsDictionary.Add("PersonOrGroupField", "Username");
             expectedFieldsDictionary.Add("LinkField", "https://www.microsoft.com");
             expectedFieldsDictionary.Add("ImageField", "https://www.microsoft.com");
 
+            // Act
             var fieldsDictionary = item.ToDictionary();
 
-            expectedFieldsDictionary.Count.ShouldEqual(fieldsDictionary.Count);
+            // Assert
+            expectedFieldsDictionary.Count.Should().Be(fieldsDictionary.Count);
 
             fieldsDictionary.Keys.ToList().ForEach(key =>
             {
-                expectedFieldsDictionary[key].ShouldEqual(fieldsDictionary[key]);
+                expectedFieldsDictionary[key].Should().Be(fieldsDictionary[key]);
             });
         }
 
-        [Fact]
-        public void SharePoint_Extensions_References_Fields_Test()
+        [Trait("Category", "SharePointCore - Extensions")]
+        [Fact(DisplayName = "Gets all SharePoint references presents in object")]
+        public void SharePointExtensions_GetReferences_AllReferencesFromObject()
         {
+            // Arrange
             var item = new SharePointListItem
             {
                 LookupField = new SharePointAggregatingListItem
@@ -88,54 +95,62 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             var expectedReferencesDictionary = new Dictionary<string, object>();
             expectedReferencesDictionary.Add("LookupField", new SharePointAggregatingListItem { Id = 1 });
 
+            // Act
             var referencesDictionary = item.GetReferences();
 
-            expectedReferencesDictionary.Count.ShouldEqual(referencesDictionary.Count);
+            // Assert
+            expectedReferencesDictionary.Count.Should().Be(referencesDictionary.Count);
 
             referencesDictionary.Keys.ToList().ForEach(key =>
             {
                 ((SharePointAggregatingListItem)expectedReferencesDictionary[key])
-                    .Id.ShouldEqual(((SharePointAggregatingListItem)referencesDictionary[key]).Id);
+                    .Id.Should().Be(((SharePointAggregatingListItem)referencesDictionary[key]).Id);
             });
         }
 
-        [Fact]
-        public void SharePoint_Extensions_Users_Fields_Test()
+        [Trait("Category", "SharePointCore - Extensions")]
+        [Fact(DisplayName = "Gets all users associated from SharePoint object")]
+        public void SharePointExtensions_GetUserFields_AllUserFieldsFromObject()
         {
+            // Arrange
             var item = new SharePointListItem
             {
-                PersonOrGroupField = Username
+                PersonOrGroupField = "Username"
             };
 
             var expectedUsersDictionary = new Dictionary<string, object>();
-            expectedUsersDictionary.Add("PersonOrGroupField", Username);
+            expectedUsersDictionary.Add("PersonOrGroupField", "Username");
 
+            // Act
             var usersDictionary = item.GetUserFields();
 
+            // Assert
             usersDictionary.Keys.ToList().ForEach(key =>
             {
-                expectedUsersDictionary[key].ShouldEqual(usersDictionary[key]);
+                expectedUsersDictionary[key].Should().Be(usersDictionary[key]);
             });
         }
 
-        [Fact]
-        public async Task SharePoint_Extensions_Configure_Users_Test()
+        //[Fact]
+        //public async Task SharePoint_Extensions_Configure_Users_Test()
+        //{
+        //    var item = new SharePointListItem
+        //    {
+        //        PersonOrGroupField = "Username"
+        //    };
+
+        //    var itemTracking = new SharePointItemTracking(item);
+
+        //    await itemTracking.ConfigureUserFieldsAsync(_sharePointClient);
+
+        //    itemTracking.Fields["PersonOrGroupField"].Should().Be(UserId);
+        //}
+
+        [Trait("Category", "SharePointCore - Extensions")]
+        [Fact(DisplayName = "Configures all aggregations fields from SharePoint object")]
+        public void SharePointExtensions_ConfigureReferences_ConfiguresAggregatingFields()
         {
-            var item = new SharePointListItem
-            {
-                PersonOrGroupField = Username
-            };
-
-            var itemTracking = new SharePointItemTracking(item);
-
-            await itemTracking.ConfigureUserFieldsAsync(_sharePointClient);
-
-            itemTracking.Fields["PersonOrGroupField"].ShouldEqual(UserId);
-        }
-
-        [Fact]
-        public void SharePoint_Extensions_Configure_References_Test()
-        {
+            // Arrange
             var aggregatingListItem = new SharePointAggregatingListItem
             {
                 Id = 1,
@@ -154,16 +169,19 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             tracking.Add(itemListTracking);
             tracking.Add(aggregatingListItemTracking);
 
-            itemListTracking.Fields["LookupField"].ShoudBeNull();
-
+            // Act
+            itemListTracking.Fields["LookupField"].Should().BeNull();
             itemListTracking.ConfigureReferences(tracking);
 
-            itemListTracking.Fields["LookupField"].ShouldEqual(aggregatingListItem.Id);
+            // Assert
+            itemListTracking.Fields["LookupField"].Should().Be(aggregatingListItem.Id);
         }
 
-        [Fact]
-        public void SharePoint_Extensions_Configure_References_Original_Item_Test()
+        [Trait("Category", "SharePointCore - Extensions")]
+        [Fact(DisplayName = "Configures all aggregations from original fields from SharePoint object")]
+        public void SharePointExtensions_ConfigureReferences_ConfiguresAggregatingFromOriginalFields()
         {
+            // Arrange
             var aggregatingListItem = new SharePointAggregatingListItem
             {
                 Id = 1,
@@ -185,11 +203,12 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             tracking.Add(itemListTracking);
             tracking.Add(aggregatingListItemTracking);
 
-            itemListTracking.OriginalFields["LookupField"].ShoudBeNull();
-
+            // Act
+            itemListTracking.OriginalFields["LookupField"].Should().BeNull();
             itemListTracking.ConfigureReferences(tracking, true);
 
-            itemListTracking.OriginalFields["LookupField"].ShouldEqual(aggregatingListItem.Id);
+            // Assert
+            itemListTracking.OriginalFields["LookupField"].Should().Be(aggregatingListItem.Id);
         }
     }
 }

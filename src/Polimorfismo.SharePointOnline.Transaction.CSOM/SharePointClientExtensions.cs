@@ -18,11 +18,10 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.SharePoint.Client;
-using Polimorfismo.SharePoint.Transaction;
 using Polimorfismo.SharePoint.Transaction.Utils;
 using Polimorfismo.SharePoint.Transaction.Resources;
 
-namespace Polimorfismo.Microsoft.SharePoint.Transaction
+namespace Polimorfismo.SharePoint.Transaction
 {
     /// <summary>
     /// SharePoint context extension to extend its functionality.
@@ -100,10 +99,13 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
                     {
                         var file = (ISharePointFile)item;
                         var fileInfo = clientContext.GetFileInfoByServerRelativeUrl(listItem[SharePointConstants.FieldNameFileRef].ToString()).GetAwaiter().GetResult();
-                        file.FileName = fileInfo.Name;                        
+
+                        file.FileName = fileInfo.Name;
                         file.InputStream = new System.IO.MemoryStream(fileInfo.Content);
                         file.Folder = listItem[SharePointConstants.FieldNameFileDirRef].ToString();
-                        file.Folder = file.Folder.Substring(file.Folder.IndexOf(file.ListName) + file.ListName.Length + 1);
+                        file.Folder = file.Folder.EndsWith(file.ListName) 
+                            ? file.Folder.Substring(file.Folder.IndexOf(file.ListName) + file.ListName.Length)
+                            : file.Folder.Substring(file.Folder.IndexOf(file.ListName) + file.ListName.Length + 1);
                     }
                 }
             }
@@ -113,14 +115,14 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         public static List GetList(this ClientContext clientContext, string listName)
         {
-            if (string.IsNullOrEmpty(listName)) throw new ArgumentNullException(nameof(listName));
+            if (string.IsNullOrWhiteSpace(listName)) throw new ArgumentNullException(nameof(listName));
 
             return clientContext.Web.Lists.GetByTitle(listName);
         }
 
         public static async Task<bool> DocumentIsFile(this ClientContext clientContext, List documentLibrary, string fileRef)
         {
-            var camlQuery = new CamlQuery
+            var camlQuery = new CamlQuery()
             {
                 ViewXml = string.Format(SharePointQueries.QueryDocumentType, fileRef)
             };

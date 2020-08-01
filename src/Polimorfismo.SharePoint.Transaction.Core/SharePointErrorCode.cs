@@ -24,6 +24,7 @@ namespace Polimorfismo.SharePoint.Transaction
         PreparationCommandNotCompleted = 400,
         DocumentNotFound = 401,
         OnlyFoldersCanReceiveDocuments = 402,
-        SaveChanges = 403
+        SaveChanges = 403,
+        UpdatedDocumentMetadata = 404
     }
 }

@@ -12,29 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.IO;
-using Polimorfismo.SharePoint.Transaction;
+using Polimorfismo.SharePoint.Transaction.Utils;
 
-namespace Polimorfismo.SharePointOnline.Transaction.Tests
+namespace Polimorfismo.SharePoint.Transaction.Commons.Tests
 {
     /// <summary>
-    /// Represents a document in SharePoint.
+    /// Represents an item in an aggregating list.
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
-    /// <Date>2020-06-07 09:10:18 AM</Date>
-    internal class SharePointFile : ISharePointFile
+    /// <Date>2020-06-10 07:41:58 PM</Date>
+    public class SharePointAggregatingListItem : ISharePointItem
     {
-        public string ListName => "DocumentsList";
+        public string ListName => "AggregatingList";
 
         public int Id { get; set; }
 
-        [SharePointField("Description0")]
-        public string Description { get; set; }
-
-        public string Folder { get; set; }
-
-        public string FileName { get; set; }
-
-        public Stream InputStream { get; set; }
+        [SharePointField(SharePointConstants.FieldNameTitle)]
+        public string TitleField { get; set; }
     }
 }

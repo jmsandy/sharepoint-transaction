@@ -121,7 +121,7 @@
     <value>&lt;View Scope='RecursiveAll'&gt;&lt;Query&gt;&lt;/Query&gt;&lt;/View&gt;</value>
   </data>
   <data name="QueryDocumentType" xml:space="preserve">
-    <value>&lt;View&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name='FileRef' /&gt;&lt;Value Type='Text'&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;</value>
+    <value>&lt;View Scope='RecursiveAll'&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name='FileRef' /&gt;&lt;Value Type='Text'&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;</value>
   </data>
   <data name="QueryItemById" xml:space="preserve">
     <value>&lt;View Scope="RecursiveAll"&gt;&lt;Query&gt;&lt;Where&gt;&lt;Eq&gt;&lt;FieldRef Name='ID' /&gt;&lt;Value Type='Counter'&gt;{0}&lt;/Value&gt;&lt;/Eq&gt;&lt;/Where&gt;&lt;/Query&gt;&lt;/View&gt;</value>

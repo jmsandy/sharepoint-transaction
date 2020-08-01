@@ -16,15 +16,18 @@ using System;
 using System.IO;
 using System.Net;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using Microsoft.SharePoint.Client;
-using Polimorfismo.SharePoint.Transaction;
+using System.Runtime.CompilerServices;
 using Polimorfismo.SharePoint.Transaction.Utils;
 using Polimorfismo.SharePoint.Transaction.Resources;
 
-namespace Polimorfismo.Microsoft.SharePoint.Transaction
+[assembly: InternalsVisibleTo("Polimorfismo.SharePointOnline.Transaction.CSOM.Tests")]
+
+namespace Polimorfismo.SharePoint.Transaction
 {
     /// <summary>
     /// Client context to perform operations in SharePoint.
@@ -38,6 +41,8 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
         private ClientContext _clientContext;
 
         private readonly string _webFullUrl;
+
+        private readonly object _lock = new object();
 
         private readonly ICredentials _networkCredential;
 
@@ -82,20 +87,31 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         public override async Task<SharePointUser> GetUserByLoginAsync(string login)
         {
+            return await Task.Run(() => GetUserByLogin(login));
+        }
+
+        public override SharePointUser GetUserByLogin(string login)
+        {
             if (string.IsNullOrWhiteSpace(login)) throw new ArgumentNullException(nameof(login));
 
             var sharePointUser = _users.FirstOrDefault(u => u.Login.Equals(login, StringComparison.InvariantCulture));
             if (sharePointUser != null) return sharePointUser;
 
-            var user = ClientContext.Web.EnsureUser(login);
-            ClientContext.Load(user);
-            await ClientContext.ExecuteQueryAsync();
+            lock (_lock)
+            {
+                sharePointUser = _users.FirstOrDefault(u => u.Login.Equals(login, StringComparison.InvariantCulture));
+                if (sharePointUser != null) return sharePointUser;
 
-            sharePointUser = new SharePointUser(user.Id, login, user.Email, user.Title);
+                var user = ClientContext.Web.EnsureUser(login);
+                ClientContext.Load(user, u => u.Id, u => u.Email, u => u.Title);
+                ClientContext.ExecuteQuery();
 
-            _users.Add(sharePointUser);
+                sharePointUser = new SharePointUser(user.Id, login, user.Email, user.Title);
 
-            return sharePointUser;
+                _users.Add(sharePointUser);
+
+                return sharePointUser;
+            }
         }
 
         protected override internal async Task<int> AddItemAsync<TSharePointItem>(IReadOnlyDictionary<string, object> fields)
@@ -178,7 +194,8 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
             var baseFolder = "";
             var createdFolders = new List<string>();
-            foreach (var name in (folderName ?? string.Empty).Split('/'))
+            foreach (var name in (folderName ?? string.Empty).Split('/')
+                .Where(name => !string.IsNullOrWhiteSpace(name)))
             {
                 baseFolder += $"/{name}";
 
@@ -199,8 +216,21 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             }
 
             var file = folder.Files.Add(fileCreateInfo);
+            await ClientContext.ExecuteQueryAsync();
 
-            var id = await Update(file.ListItemAllFields, fields);
+            ClientContext.Load(file, f => f.ListItemAllFields[SharePointConstants.FieldNameId]);
+            await ClientContext.ExecuteQueryAsync();
+
+            var id = (int)file.ListItemAllFields[SharePointConstants.FieldNameId];
+            try
+            {
+                id = await Update(file.ListItemAllFields, fields);
+            } 
+            catch (Exception ex)
+            {
+                throw new SharePointException(SharePointErrorCode.UpdatedDocumentMetadata,
+                    new ValueTuple<int, List<string>>(id, createdFolders), ex.Message, ex);
+            }
 
             return (id, createdFolders);
         }
@@ -241,7 +271,7 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
             await ClientContext.ExecuteQueryAsync();
         }
 
-        public override async Task<SharePointDocumentInfo> GetFilesAsync(string documentLibraryName, string fileRef)
+        public override async Task<SharePointDocumentInfo> GetDocumentsInfoAsync(string documentLibraryName, string fileRef)
         {
             SharePointDocumentInfo documentInfo = null;
 
@@ -303,7 +333,8 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
         public ICollection<TSharePointFile> GetFiles<TSharePointFile>(CamlQuery camlQuery = null,
             params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointFile : ISharePointFile, new()
         {
-            return GetFilesAsync<TSharePointFile>(camlQuery, retrievals).GetAwaiter().GetResult();
+            return Task<Task<ICollection<TSharePointFile>>>.Factory.StartNew(() => GetFilesAsync<TSharePointFile>(camlQuery, retrievals),
+                CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
         }
 
         public async Task<ICollection<TSharePointFile>> GetFilesAsync<TSharePointFile>(CamlQuery camlQuery = null,
@@ -315,7 +346,8 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
         public ICollection<TSharePointItem> GetItems<TSharePointItem>(CamlQuery camlQuery = null,
             params Expression<Func<ListItemCollection, object>>[] retrievals) where TSharePointItem : ISharePointItem, new()
         {
-            return GetItemsAsync<TSharePointItem>(camlQuery, retrievals).GetAwaiter().GetResult();
+            return Task<Task<ICollection<TSharePointItem>>>.Factory.StartNew(() => GetItemsAsync<TSharePointItem>(camlQuery, retrievals),
+                CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
         }
 
         public async Task<ICollection<TSharePointItem>> GetItemsAsync<TSharePointItem>(CamlQuery camlQuery = null,
@@ -385,14 +417,16 @@ namespace Polimorfismo.Microsoft.SharePoint.Transaction
 
         #region IDisposable - Members
 
-        public override void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
+            if (Disposed) return;
 
             if (disposing)
             {
                 _clientContext?.Dispose();
             }
+
+            base.Dispose(disposing);
         }
 
         #endregion

@@ -29,6 +29,10 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         public Guid Id { get; }
 
+        public bool StackFirst { get; }
+
+        protected bool Disposed { get; private set; }
+
         public SharePointClientBase SharePointClient { get; }
 
         public SharePointItemTracking SharePointItemTracking { get; }
@@ -37,9 +41,10 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         #region Constructors / Finalizers
 
-        protected SharePointCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
+        protected SharePointCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking, bool stackFirst = false)
         {
             Id = Guid.NewGuid();
+            StackFirst = stackFirst;
             SharePointClient = sharePointClient;
             SharePointItemTracking = itemTracking;
         }
@@ -66,12 +71,16 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
             GC.SuppressFinalize(this);
         }
 
-        public virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
+            if (Disposed) return;
+
             if (disposing)
             {   
                 SharePointClient?.Dispose();
             }
+
+            Disposed = true;
         }
 
         #endregion

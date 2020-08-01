@@ -51,8 +51,10 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         public override async Task UndoAsync()
         {
-            await SharePointClient.DeleteItemAsync<TSharePointItem>(SharePointItemTracking.Id);
-
+            if (SharePointItemTracking.Id > 0)
+            {
+                await SharePointClient.DeleteItemAsync<TSharePointItem>(SharePointItemTracking.Id);
+            }
             SharePointItemTracking.Id = 0;
         }
 

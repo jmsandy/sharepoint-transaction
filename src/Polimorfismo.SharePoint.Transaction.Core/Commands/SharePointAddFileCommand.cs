@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -36,7 +37,7 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
         #region Constructors / Finalizers
 
         public SharePointAddFileCommand(SharePointClientBase sharePointClient, SharePointItemTracking itemTracking)
-            : base(sharePointClient, itemTracking)
+            : base(sharePointClient, itemTracking, true)
         {
         }
 
@@ -50,21 +51,34 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
 
         public override async Task ExecuteAsync()
         {
-            var sharePointFile = (ISharePointFile)SharePointItemTracking.Item;
+            try
+            {
+                var sharePointFile = (ISharePointFile)SharePointItemTracking.Item;
 
-            var fileInfo = await SharePointClient.AddFileAsync<TSharePointFile>(
-                SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking), 
-                sharePointFile.FileName, sharePointFile.Folder, sharePointFile.InputStream, false);
+                var fileInfo = await SharePointClient.AddFileAsync<TSharePointFile>(
+                    SharePointItemTracking.ConfigureReferences(SharePointClient.Tracking),
+                    sharePointFile.FileName, sharePointFile.Folder, sharePointFile.InputStream, false);
 
-            SharePointItemTracking.Id = fileInfo.Id;
-            _createdFolders = fileInfo.CreatedFolders;
+                SharePointItemTracking.Id = fileInfo.Id;
+                _createdFolders = fileInfo.CreatedFolders;
+            }
+            catch (SharePointException ex)
+            {
+                var data = ex.SharePointData as ValueTuple<int, List<string>>?;
+                _createdFolders = data?.Item2;
+                SharePointItemTracking.Id = data?.Item1 ?? 0;
+
+                throw ex;
+            }
         }
 
         public override async Task UndoAsync()
-        {   
-            await SharePointClient.DeleteFileAsync<TSharePointFile>(SharePointItemTracking.Id);
-            await SharePointClient.RemoveFoldersAsync<TSharePointFile>(_createdFolders);
-
+        {
+            if (SharePointItemTracking.Id > 0)
+            {
+                await SharePointClient.DeleteFileAsync<TSharePointFile>(SharePointItemTracking.Id);
+                await SharePointClient.RemoveFoldersAsync<TSharePointFile>(_createdFolders);
+            }
             SharePointItemTracking.Id = 0;
         }
 

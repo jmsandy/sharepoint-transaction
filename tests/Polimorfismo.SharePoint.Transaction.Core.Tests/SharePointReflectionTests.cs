@@ -15,21 +15,25 @@
 using Xunit;
 using System;
 using System.Linq;
+using FluentAssertions;
 using System.Collections.Generic;
 using Polimorfismo.SharePoint.Transaction.Utils;
+using Polimorfismo.SharePoint.Transaction.Commons.Tests;
 
-namespace Polimorfismo.SharePointOnline.Transaction.Tests
+namespace Polimorfismo.SharePoint.Transaction.Core.Tests
 {
     /// <summary>
     /// Tests related to the reflection process.
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-06-15 08:06:46 PM</Date>
-    public class SharePointReflectionUnitTest : SharePointBaseUnitTest
+    public class SharePointReflectionTests
     {
-        [Fact]
-        public void SharePoint_Reflection_Fields_Test()
+        [Trait("Category", "SharePointCore - Reflection")]
+        [Fact(DisplayName = "Retrieves all fields from SharePoint objects")]
+        public void SharePointReflectionUtils_GetSharePointFieldsDictionary_FieldsRetrievedWithSuccess()
         {
+            // Arrange
             var item = new SharePointListItem
             {
                 IntegerField = 1,
@@ -40,8 +44,8 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
                 OptionField = "Option 2",
                 TextField = "Single Line",
                 TextArea = "Multiple Lines",
-                PersonOrGroupField = Username,
                 DateField = DateTime.Now.Date,
+                PersonOrGroupField = "Username",
                 LinkField = "https://www.microsoft.com",
                 ImageField = "https://www.microsoft.com"
             };
@@ -59,23 +63,27 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             expectedFieldsDictionary.Add("TextArea", "Multiple Lines");
             expectedFieldsDictionary.Add("Created", DateTime.MinValue);
             expectedFieldsDictionary.Add("Modified", DateTime.MinValue);
-            expectedFieldsDictionary.Add("PersonOrGroupField", Username);
+            expectedFieldsDictionary.Add("PersonOrGroupField", "Username");
             expectedFieldsDictionary.Add("LinkField", "https://www.microsoft.com");
             expectedFieldsDictionary.Add("ImageField", "https://www.microsoft.com");
 
+            // Act
             var fieldsDictionary = SharePointReflectionUtils.GetSharePointFieldsDictionary(item);
 
-            expectedFieldsDictionary.Count.ShouldEqual(fieldsDictionary.Count);
+            // Assert
+            expectedFieldsDictionary.Count.Should().Be(fieldsDictionary.Count);
 
             fieldsDictionary.Keys.ToList().ForEach(key =>
             {
-                expectedFieldsDictionary[key].ShouldEqual(fieldsDictionary[key]);
+                expectedFieldsDictionary[key].Should().Be(fieldsDictionary[key]);
             });
         }
 
-        [Fact]
-        public void SharePoint_Reflection_References_Fields_Test()
+        [Trait("Category", "SharePointCore - Reflection")]
+        [Fact(DisplayName = "Retrieves references from SharePoint objects")]
+        public void SharePointReflectionUtils_GetSharePointReferencesDictionary_ReferencesRetrievedWithSuccess()
         {
+            // Arrange
             var item = new SharePointListItem
             {
                 LookupField = new SharePointAggregatingListItem
@@ -87,33 +95,39 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             var expectedReferencesDictionary = new Dictionary<string, object>();
             expectedReferencesDictionary.Add("LookupField", new SharePointAggregatingListItem { Id = 1 });
 
+            // Act
             var referencesDictionary = SharePointReflectionUtils.GetSharePointReferencesDictionary(item);
 
-            expectedReferencesDictionary.Count.ShouldEqual(referencesDictionary.Count);
+            // Assert
+            expectedReferencesDictionary.Count.Should().Be(referencesDictionary.Count);
 
             referencesDictionary.Keys.ToList().ForEach(key =>
             {
                 ((SharePointAggregatingListItem)expectedReferencesDictionary[key])
-                    .Id.ShouldEqual(((SharePointAggregatingListItem)referencesDictionary[key]).Id);
+                    .Id.Should().Be(((SharePointAggregatingListItem)referencesDictionary[key]).Id);
             });
         }
 
-        [Fact]
-        public void SharePoint_Reflection_Users_Fields_Test()
+        [Trait("Category", "SharePointCore - Reflection")]
+        [Fact(DisplayName = "Retrieves users from SharePoint objects")]
+        public void SharePointReflectionUtils_GetSharePointUsersDictionary_UsersRetrievedWithSuccess()
         {
+            // Arrange
             var item = new SharePointListItem
             {
-                PersonOrGroupField = Username
+                PersonOrGroupField = "Username"
             };
 
             var expectedUsersDictionary = new Dictionary<string, object>();
-            expectedUsersDictionary.Add("PersonOrGroupField", Username);
+            expectedUsersDictionary.Add("PersonOrGroupField", "Username");
 
+            // Act
             var usersDictionary = SharePointReflectionUtils.GetSharePointUsersDictionary(item);
 
+            // Assert
             usersDictionary.Keys.ToList().ForEach(key =>
             {
-                expectedUsersDictionary[key].ShouldEqual(usersDictionary[key]);
+                expectedUsersDictionary[key].Should().Be(usersDictionary[key]);
             });
         }
     }

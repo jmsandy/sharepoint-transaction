@@ -26,6 +26,8 @@ namespace Polimorfismo.SharePoint.Transaction.Commands
     {
         Guid Id { get; }
 
+        bool StackFirst { get; }
+
         SharePointClientBase SharePointClient { get; }
 
         SharePointItemTracking SharePointItemTracking { get; }

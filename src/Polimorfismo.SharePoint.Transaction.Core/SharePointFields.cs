@@ -32,6 +32,8 @@ namespace Polimorfismo.SharePoint.Transaction
         #endregion
 
         #region Properties 
+        
+        private bool Disposed { get; set; }
 
         public int Count => _fields.Count;
 
@@ -69,9 +71,15 @@ namespace Polimorfismo.SharePoint.Transaction
             GC.SuppressFinalize(this);
         }
 
-        public void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
-            if (!disposing) return;
+            if (Disposed) return;
+
+            if (!disposing)
+            {
+            }
+
+            Disposed = true;
         }
 
         #endregion

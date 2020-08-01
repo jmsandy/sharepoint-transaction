@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>José Mauro da Silva Sandy</Authors>
+    <RepositoryUrl>https://github.com/jmsandy/sharepoint-transaction</RepositoryUrl>
+    <Description>Unit test to SharePoint commons operations.</Description>
+    <Company>Polimorfismo</Company>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>Copyright (c) Polimorfismo - José Mauro da Silva Sandy</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+	  <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Polimorfismo.SharePoint.Transaction.Core\Polimorfismo.SharePoint.Transaction.Core.csproj" />
+  </ItemGroup>
+</Project>

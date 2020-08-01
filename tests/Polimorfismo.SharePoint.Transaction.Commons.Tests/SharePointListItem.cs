@@ -13,17 +13,16 @@
 // limitations under the License.
 
 using System;
-using Polimorfismo.SharePoint.Transaction;
 using Polimorfismo.SharePoint.Transaction.Utils;
 
-namespace Polimorfismo.SharePointOnline.Transaction.Tests
+namespace Polimorfismo.SharePoint.Transaction.Commons.Tests
 {
     /// <summary>
     /// Represents a list item in SharePoint.
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-06-07 09:23:35 PM</Date>
-    internal class SharePointListItem : ISharePointItem
+    public class SharePointListItem : ISharePointItem
     {
         public string ListName => "MyCustomList";
 
@@ -62,7 +61,7 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
         [SharePointField("CurrencyField", Type = typeof(decimal))]
         public decimal CurrencyField { get; set; }
 
-        [SharePointField("PersonOrGroupField",  IsUserValue = true)]
+        [SharePointField("PersonOrGroupField", IsUserValue = true)]
         public string PersonOrGroupField { get; set; }
 
         [SharePointField(SharePointConstants.FieldNameCreated)]

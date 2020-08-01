@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+	<Authors>José Mauro da Silva Sandy</Authors>
+	<RepositoryUrl>https://github.com/jmsandy/sharepoint-transaction</RepositoryUrl>
+	<Description>Unit test to SharePoint integration core.</Description>
+    <Company>Polimorfismo</Company>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>Copyright (c) Polimorfismo - José Mauro da Silva Sandy</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<None Include="..\..\LICENSE">
+	  <Pack>True</Pack>
+	  <PackagePath></PackagePath>
+	</None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="coverlet.collector" Version="1.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Polimorfismo.SharePoint.Transaction.Core\Polimorfismo.SharePoint.Transaction.Core.csproj" />
+    <ProjectReference Include="..\Polimorfismo.SharePoint.Transaction.Commons.Tests\Polimorfismo.SharePoint.Transaction.Commons.Tests.csproj" />
+  </ItemGroup>
+</Project>

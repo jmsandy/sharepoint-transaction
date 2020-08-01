@@ -14,22 +14,26 @@
 
 using Xunit;
 using System;
+using FluentAssertions;
 using System.Threading.Tasks;
-using Polimorfismo.SharePoint.Transaction;
 
-namespace Polimorfismo.SharePointOnline.Transaction.Tests
+namespace Polimorfismo.SharePoint.Transaction.Core.Tests
 {
     /// <summary>
     /// Tests for background tasks.
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-06-15 09:08:42 PM</Date>
-    public class SharePointBackgroundTasksUnitTest : SharePointBaseUnitTest
+    public class SharePointBackgroundTasksTests
     {
-        [Fact]
-        public void SharePoint_Background_Task_Cancel_Test()
+        [Trait("Category", "SharePointCore - BackgroundTasks")]
+        [Fact(DisplayName = "Cancel background tasks")]
+        public void SharePointBackgroundTasks_Cancel_TasksNotCompleted()
         {
+            // Arrange
             var backgroundTasks = new SharePointBackgroundTasks();
+
+            // Act
             backgroundTasks.Action(() =>
             {
                 Task.Delay(TimeSpan.FromSeconds(20));
@@ -38,13 +42,20 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             });
             backgroundTasks.Cancel();
 
-            backgroundTasks.AllTasksCompletedSuccess().ShouldBeFalse();
+            // Assert
+            backgroundTasks.AllTasksCompletedSuccess().Should().BeFalse();
+
+            backgroundTasks.Dispose();
         }
 
-        [Fact]
-        public void SharePoint_Background_Task_All_Completed_Success_Test()
+        [Trait("Category", "SharePointCore - BackgroundTasks")]
+        [Fact(DisplayName = "Background tasks completed")]
+        public void SharePointBackgroundTasks_AllTasksCompletedSuccess_CompletedWithSuccess()
         {
+            // Arrange
             var backgroundTasks = new SharePointBackgroundTasks();
+
+            // Act
             backgroundTasks.Action(() =>
             {
                 Task.Delay(TimeSpan.FromSeconds(20));
@@ -53,7 +64,10 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             });
             backgroundTasks.Wait(30);
 
-            backgroundTasks.AllTasksCompletedSuccess().ShouldBeTrue();
+            // Assert
+            backgroundTasks.AllTasksCompletedSuccess().Should().BeTrue();
+
+            backgroundTasks.Dispose();
         }
     }
 }

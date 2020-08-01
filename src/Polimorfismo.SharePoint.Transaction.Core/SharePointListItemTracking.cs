@@ -33,6 +33,8 @@ namespace Polimorfismo.SharePoint.Transaction
 
         #region Properties
 
+        private bool Disposed { get; set; }
+
         public IReadOnlyList<SharePointItemTracking> Items => _items;
 
         #endregion
@@ -69,12 +71,17 @@ namespace Polimorfismo.SharePoint.Transaction
             GC.SuppressFinalize(this);
         }
 
-        public void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
+            if (Disposed) return;
+
             if (disposing)
             {
+                _items.ForEach(item => item.Dispose());
                 _items.Clear();
             }
+
+            Disposed = true;
         }
 
         #endregion

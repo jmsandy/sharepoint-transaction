@@ -55,7 +55,7 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public void AddDocument(SharePointDocumentInfo document)
         {
-            _documents.Add(document);
+            AddDocuments(new List<SharePointDocumentInfo>() { document });
         }
 
         public void AddDocuments(IEnumerable<SharePointDocumentInfo> documents)

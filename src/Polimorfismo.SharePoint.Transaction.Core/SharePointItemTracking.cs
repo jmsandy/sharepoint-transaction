@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
 using Polimorfismo.SharePoint.Transaction.Utils;
 
@@ -22,9 +23,11 @@ namespace Polimorfismo.SharePoint.Transaction
     /// </summary>
     /// <Author>Jose Mauro da Silva Sandy</Author>
     /// <Date>2020-05-24 08:32:26 PM</Date>
-    internal class SharePointItemTracking
+    internal sealed class SharePointItemTracking : IDisposable
     {
         #region Properties
+
+        private bool Disposed { get; set; }
 
         public ISharePointMetadata Item { get; }
 
@@ -61,6 +64,29 @@ namespace Polimorfismo.SharePoint.Transaction
             IsOriginalItemLoaded = true;
             OriginalItem = originalItem;
             OriginalFields = new SharePointFields(originalItem, fields);
+        }
+
+        #endregion
+
+        #region IDisposable - Members
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (Disposed) return;
+
+            if (disposing)
+            {
+                Fields?.Dispose();
+                OriginalFields?.Dispose();
+            }
+
+            Disposed = true;
         }
 
         #endregion

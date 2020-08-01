@@ -24,6 +24,8 @@ namespace Polimorfismo.SharePoint.Transaction
     /// <Date>2020-06-10 08:29:23 PM</Date>
     public class SharePointException : Exception, ISerializable
     {
+        public object SharePointData { get; }
+
         public SharePointErrorCode ErrorCode { get; }
 
         public SharePointException(SharePointErrorCode errorCode)
@@ -37,9 +39,15 @@ namespace Polimorfismo.SharePoint.Transaction
         }
 
         public SharePointException(SharePointErrorCode errorCode, string message, Exception innerException)
+            : this(errorCode, null, message, innerException)
+        {
+        }
+
+        public SharePointException(SharePointErrorCode errorCode, object sharePointData, string message, Exception innerException)
             : base(message, innerException)
         {
             ErrorCode = errorCode;
+            SharePointData = sharePointData;
         }
     }
 }
