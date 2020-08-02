@@ -31,3 +31,9 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+  env:
+    SPPWD: $(SPPWD)
+    SPUSERID: $(SPUSERID)
+    SPUSERNAME: $(SPUSERNAME)
+    WEBFULLURL: $(WEBFULLURL)
+    
