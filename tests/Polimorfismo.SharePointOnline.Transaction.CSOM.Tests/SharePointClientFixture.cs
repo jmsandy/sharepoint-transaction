@@ -41,13 +41,13 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
     {
         #region Constants
 
-        protected const int UserId = 0;
+        private readonly string UserPwd = Environment.GetEnvironmentVariable("SPPWD");
 
-        protected const string UserPwd = "";
+        private readonly string Username = Environment.GetEnvironmentVariable("SPUSERNAME");
 
-        protected const string Username = "";
+        protected readonly string WebFullUrl = Environment.GetEnvironmentVariable("WEBFULLURL");
 
-        protected const string WebFullUrl = "";
+        protected readonly int UserId = Convert.ToInt32(Environment.GetEnvironmentVariable("SPUSERID"));
 
         #endregion
 
