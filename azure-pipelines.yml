@@ -31,3 +31,11 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+    codeCoverageEnabled: true
+    
+  env:
+    SPPWD: $(SPPWD)
+    SPUSERID: $(SPUSERID)
+    SPUSERNAME: $(SPUSERNAME)
+    WEBFULLURL: $(WEBFULLURL)
+    
