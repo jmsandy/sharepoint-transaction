@@ -131,21 +131,6 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             });
         }
 
-        //[Fact]
-        //public async Task SharePoint_Extensions_Configure_Users_Test()
-        //{
-        //    var item = new SharePointListItem
-        //    {
-        //        PersonOrGroupField = "Username"
-        //    };
-
-        //    var itemTracking = new SharePointItemTracking(item);
-
-        //    await itemTracking.ConfigureUserFieldsAsync(_sharePointClient);
-
-        //    itemTracking.Fields["PersonOrGroupField"].Should().Be(UserId);
-        //}
-
         [Trait("Category", "SharePointCore - Extensions")]
         [Fact(DisplayName = "Configures all aggregations fields from SharePoint object")]
         public void SharePointExtensions_ConfigureReferences_ConfiguresAggregatingFields()

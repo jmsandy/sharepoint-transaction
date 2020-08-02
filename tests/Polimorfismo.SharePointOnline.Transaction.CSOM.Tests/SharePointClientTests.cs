@@ -21,8 +21,8 @@ using FluentAssertions;
 using System.Threading.Tasks;
 using Polimorfismo.SharePoint.Transaction;
 using Polimorfismo.SharePoint.Transaction.Utils;
+using Polimorfismo.SharePoint.Transaction.Resources;
 using Polimorfismo.SharePoint.Transaction.Commons.Tests;
-using System.Xml.XPath;
 
 namespace Polimorfismo.SharePointOnline.Transaction.Tests
 {
@@ -619,7 +619,7 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
         {
             // Arrange
             var file = _sharePointClientFixture.GenerateSharePointFile();
-            var invalidFile = _sharePointClientFixture.GenerateSharePointFile(validFile: false);
+            var invalidFile = _sharePointClientFixture.GenerateSharePointFile("RemoveFolder/Level1/", false);
 
             // Act
             _sharePointClientFixture.SharePointClient.AddFile(file);
@@ -891,6 +891,24 @@ namespace Polimorfismo.SharePointOnline.Transaction.Tests
             documentInfo.Documents.Count().Should().Be(0);
             documentInfo.Length.Should().BeGreaterThan(0);
             documentInfo.ContentBase64.Should().NotBeNullOrEmpty();
+        }
+
+        [Trait("Category", "SharePointOnline - Files")]
+        [Fact(DisplayName = "Getting information from a non-existent document")]
+        public async Task SharePointClient_GetDocumentsInfoAsync_NotFound()
+        {
+            // Arrange
+            var relativePath = $"DocumentsList/{Guid.NewGuid()}.txt";
+
+            // Act
+            await _sharePointClientFixture.SharePointClient.SaveChangesAsync();
+
+            var exception = await Assert.ThrowsAsync<SharePointException>(()
+               => _sharePointClientFixture.SharePointClient.GetDocumentsInfoAsync("DocumentsList", relativePath));
+
+            // Assert
+            exception.ErrorCode.Should().Be(SharePointErrorCode.DocumentNotFound);
+            exception.Message.Should().Be(string.Format(SharePointMessages.ERR401, relativePath));
         }
     }
 }

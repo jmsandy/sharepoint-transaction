@@ -28,13 +28,8 @@ namespace Polimorfismo.SharePoint.Transaction
 
         public SharePointErrorCode ErrorCode { get; }
 
-        public SharePointException(SharePointErrorCode errorCode)
-            : this(errorCode, null)
-        {
-        }
-
         public SharePointException(SharePointErrorCode errorCode, string message)
-            : this(errorCode, message, null)
+            : this(errorCode, null, message, null)
         {
         }
 
